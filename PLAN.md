@@ -65,11 +65,16 @@ Os registros abaixo sao cronologicos: pendencias de um marco antigo podem estar 
 - [x] J10: publicar a imagem no worker e renovar/verificar as tres reservas em Go; smoke pelo Manager sem telefone pareado.
 - [x] J10: Cloud 5b9f3e8 publicada; /docs em portugues com o contrato de canais, quatro rotas protegidas responderam 401 e rota desconhecida 404.
 - [ ] J10: aceite de owner/subscriber em duas contas e nos clientes Android/iPhone/Web adiado pelo usuario.
-- [ ] Redis Streams: testar rejeicao/recuperacao com Redis real, verificar retencao e incorporar.
-- [ ] Integracoes Chatwoot/n8n, SQS/Redis Streams e armazenamento automatico de midia.
+- [x] Redis Streams: rejeicao/recuperacao, trim/exact maxlen e identidade do evento com Redis real no CI; incorporado em [Go #22](https://github.com/wppconnect-team/wppconnect-server-go/pull/22).
+- [x] SQS: destino opcional, rejeicao de fila inexistente, recuperacao e deduplicacao FIFO com ElasticMQ; incorporado em [Go #24](https://github.com/wppconnect-team/wppconnect-server-go/pull/24). Sem teste de credenciais/IAM/KMS AWS reais.
+- [x] n8n: importar workflow e credencial temporarios, publicar, recusar segredo errado e processar evento autenticado em n8n 2.47.3 isolado ([CI](https://github.com/wppconnect-team/wppconnect-server-go/actions/runs/42902244064/job/130130987174)).
+- [ ] Integracao Chatwoot e armazenamento automatico de midia. CRUD/segredos de brokers por sessao (J15) continuam separados dos adaptadores globais opcionais.
 - [x] J11 no server-go (contrato local): catalogo proprio, produto e colecoes, limite e cursor, escopo da conta e preco sem conversao.
-- [ ] J11: CI, publicacao e aceite com catalogo Business real.
+- [x] J11: fontes de leitura incorporadas em [Go #23](https://github.com/wppconnect-team/wppconnect-server-go/pull/23), CI com race e imagens.
+- [x] J11: leitura publicada na Cloud, protecao das tres rotas, guia EN/PT e tres reservas Go saudaveis; [recibo](docs/brokers-catalog-acceptance.json).
+- [ ] J11: aceite de catalogo em conta Business com produtos/colecoes reais.
 - [ ] Comercio: catalogos/produtos/pedidos/pagamentos com contratos e idempotencia.
+- [x] J05/Z126: contrato HTTP experimental de carrossel PNG/JPEG com respostas rapidas; validacao antes de upload, isolamento, deduplicacao e payload protobuf testados; CI 42901305610 aprovado e main 93304d79bd09af36386035170e78886e6b151e56.
 - [ ] Interativos modernos: botoes/listas/carrosseis/flows com teste Android/iOS/Web.
 - [ ] Chamadas: sinalizacao/audio/video/grupos, autenticacao de streams e limites de recursos.
 - [ ] Testes de protocolo para cada recurso; ausencia de fonte ou teste nao conta como paridade.
@@ -77,7 +82,8 @@ Os registros abaixo sao cronologicos: pendencias de um marco antigo podem estar 
 ## Fase 7 - Aceite e encerramento
 - [x] CI, race, integracoes PostgreSQL/brokers/S3, build e smoke multiarch aprovados para as mudancas incorporadas ate Go e01698b e Cloud 35ac0c4.
 - [x] Restauracao offline do backup consistente da conta de teste: integridade dos cinco bancos SQLite, sem abrir uma segunda conexao WhatsApp.
-- [ ] Testes de carga/falha/restauracao com resultados registrados e metas aceitas.
+- [x] Ensaio isolado de recuperacao idempotente com 1 e 4 clientes: 72 leituras autenticadas identicas, quatro registros preservados depois de restart e quatro consultas entre sessoes negadas.
+- [ ] Carga de protocolo, reconexao, midia e backlog com metas de capacidade aceitas; o microbenchmark HTTP nao cobre esses perfis.
 - [x] Mudancas implementadas publicadas a partir das fontes verificadas; health/logs/versao confirmados em 10/11/2026.
 - [ ] Checklist integral concluido com links de evidencia. Somente entao declarar 100%.
 
@@ -191,3 +197,16 @@ Cada jornada deve atualizar a matriz com SHA, contrato, teste, resultado e lacun
 
 - Canary do binario e rollout das tres reservas Go aprovados: SHA da imagem 59f610bd5d2060cd4b1eecff4ac134f7a41a49d696e97bdac68461b4eeff508a. Auditoria 20:41 UTC: tres reservas healthy, containers temporarios removidos e nenhum OOM, panic, fatal ou falha de persistencia nos logs verificados. A conta de testes pareada e a alocacao preexistente foram preservadas.
 - [Server Go #23](https://github.com/wppconnect-team/wppconnect-server-go/pull/23): leitura do catalogo proprio, produtos e resumos de colecoes. Testes locais de escopo, preco/moeda, visibilidade falsa, cursor, limites e erros aprovados.
+
+
+## Brokers, comercio e carga - 2026-11-10
+
+- Redis Streams: main ba6dee6414e7630e18ced46c0be12b74fbf69b62, CI 42896819299. O ID de evento permanece estavel mesmo quando uma entrega repetida gera outro ID de entrada no stream.
+- Catalogo proprio: main 1c42366e18125015a9d30d7abf3a5cafedeccb31, CI 42898388266. A Cloud usa commerce:read em tres consultas. Testes de conta Business real, mutacoes, pedidos e pagamentos continuam abertos.
+- SQS: main 666afa223c12efefcb9ac90a2d6920d9ea3a1b11, CI 42898825516. O teste de integracao usa ElasticMQ, nao uma conta AWS. Tanto SQS como Redis permanecem desativados por padrao.
+- [Carrossel experimental #25](https://github.com/wppconnect-team/wppconnect-server-go/pull/25): validacao local HTTP/SQLite/SDK, rejeicao antes de upload e resposta idempotente. Nao enviar para validar clientes fisicos enquanto esse teste estiver adiado.
+- Benchmark isolado: limite 0,75 CPU e 256 MiB, 24 consultas sequenciais e 48 com quatro clientes. P95 de 98,50 ms e 575,48 ms respectivamente. Primeiro ensaio nao concluiu o restart por reutilizar a porta efemera anterior; o ensaio completo consultou novamente a porta e recuperou os quatro registros. Sem mensagens de WhatsApp. [Medicoes](docs/benchmark-result-lookup.json) e [script](docs/benchmark-result-lookup.py).
+
+- Publicacao de brokers/catalogo: imagem 49a88afea20f64521ed3bb453aeb4ef3bbc77ba45b43d011abd0645cabf8db78. Tres reservas Go healthy, sem OOM ou erros criticos recentes. Cloud #41, main 3751275b5385c92ea25f5db623669ac97aad4baa, deploy confirmado e guia publico conferido em dois idiomas.
+
+- CI da fonte combinada brokers/catalogo: [42900118182](https://github.com/wppconnect-team/wppconnect-server-go/actions/runs/42900118182). O OpenAPI no Git era identico byte a byte ao gerado; o primeiro checkout Windows materializou CRLF. Repeticao com os bytes do Git passou e a regra de LF foi incorporada no PR #25.
