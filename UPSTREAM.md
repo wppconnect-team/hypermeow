@@ -64,3 +64,11 @@ Local Go 1.26.10 test, vet, build, MEX check and JS/WASM build passed. New regre
 coverage checks backoff before store access, release of its lock, handshake retry
 classification, HTTP rejection precedence and combined credential redaction.
 CI, race and dependent server validation are recorded in the integration PR.
+
+
+Dependent server validation exposed overlapping schema version 16: tulir has
+wasa_root_secret_id while HyperMeow uses that version for a sender-key index.
+The v18->v19 upgrade now checks column presence and ensures the missing index
+without overwriting root secrets. The server regression uses the exact previous
+v16 schema and verifies credential/root-secret preservation and repeat upgrade.
+Do not downgrade a live database in place; rollback restores a tested backup.

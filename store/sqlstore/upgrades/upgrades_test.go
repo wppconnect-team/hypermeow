@@ -66,6 +66,7 @@ func TestUpgradeSourcesHaveUniqueStartingVersions(t *testing.T) {
 }
 
 type upgradeTestState struct {
+	wasaColumn    bool
 	executed      []string
 	version       int64
 	compatVersion int64
@@ -99,9 +100,12 @@ func (c *upgradeTestConn) BeginTx(context.Context, driver.TxOptions) (driver.Tx,
 	return &upgradeTestTx{}, nil
 }
 
-func (c *upgradeTestConn) QueryContext(_ context.Context, query string, _ []driver.NamedValue) (driver.Rows, error) {
+func (c *upgradeTestConn) QueryContext(_ context.Context, query string, args []driver.NamedValue) (driver.Rows, error) {
 	switch {
 	case strings.Contains(query, "information_schema.columns"):
+		if len(args) == 2 && args[1].Value == "wasa_root_secret_id" {
+			return &upgradeTestRows{columns: []string{"exists"}, values: []driver.Value{c.state.wasaColumn}}, nil
+		}
 		return &upgradeTestRows{columns: []string{"exists"}, values: []driver.Value{true}}, nil
 	case strings.HasPrefix(query, "SELECT version, compat FROM whatsmeow_version"):
 		return &upgradeTestRows{columns: []string{"version", "compat"}, values: []driver.Value{c.state.version, c.state.compatVersion}}, nil
@@ -186,9 +190,36 @@ func TestUpgradeFromPublishedSchemaAddsWASARootSecret(t *testing.T) {
 		t.Fatalf("schema version = %d/%d, want 19/8", state.version, state.compatVersion)
 	}
 	for _, query := range state.executed {
-		if strings.Contains(query, "ALTER TABLE whatsmeow_chat_settings ADD COLUMN wasa_root_secret_id TEXT NOT NULL DEFAULT '';") {
+		if strings.Contains(query, "ALTER TABLE whatsmeow_chat_settings ADD COLUMN wasa_root_secret_id TEXT NOT NULL DEFAULT ''") {
 			return
 		}
 	}
 	t.Fatalf("WASA migration was not executed: %q", state.executed)
+}
+
+func TestUpgradeFromUpstreamSchemaPreservesExistingWASAColumn(t *testing.T) {
+	state := &upgradeTestState{version: 16, compatVersion: 8, wasaColumn: true}
+	rawDB := sql.OpenDB(&upgradeTestConnector{state: state})
+	t.Cleanup(func() { _ = rawDB.Close() })
+	db, err := dbutil.NewWithDB(rawDB, "postgres")
+	if err != nil {
+		t.Fatal(err)
+	}
+	db.VersionTable = "whatsmeow_version"
+	db.UpgradeTable = Table
+	if err = db.Upgrade(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+	indexCreated := false
+	for _, query := range state.executed {
+		if strings.Contains(query, "ALTER TABLE whatsmeow_chat_settings") {
+			t.Fatal("attempted duplicate column creation")
+		}
+		if strings.Contains(query, "CREATE INDEX IF NOT EXISTS whatsmeow_sender_keys_sender_idx") {
+			indexCreated = true
+		}
+	}
+	if state.version != 19 || !indexCreated {
+		t.Fatalf("incomplete migration: version=%d,index=%v", state.version, indexCreated)
+	}
 }
