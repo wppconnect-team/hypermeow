@@ -50,7 +50,8 @@ Os registros abaixo sao cronologicos: pendencias de um marco antigo podem estar 
 - [x] Idempotencia persistida de envio, recuperacao de resposta e bloqueio de reenvio ambiguo; incerteza do protocolo continua explicita.
 - [x] Falhas de entrega: consulta por sessao/destino/estado, replay seletivo auditado e metricas de backlog/capacidade, com testes de falha e recuperacao.
 - [ ] Instalar regras de alerta no monitoramento operacional e validar acionamento/recuperacao com o destino de notificacao definido.
-- [ ] Testes reais de QR/phone, reconexao, envio/recebimento/midia/ACK/logout e dois tenants.
+- [x] Conta de teste real: QR, reconexao, texto/arquivo, ACK de entrega/leitura, resposta recebida, idempotencia e download de midia depois de restart. Outro workspace recebe 404.
+- [ ] Logout e jornadas com duas contas pareadas; testes de pareamento por codigo de telefone separados do QR.
 
 ## Fase 6 - Paridade funcional Zuck
 - [x] Converter inventario de 303 operacoes em matriz executavel de contratos e criterios por jornada.
@@ -63,7 +64,8 @@ Os registros abaixo sao cronologicos: pendencias de um marco antigo podem estar 
 - [ ] Testes de protocolo para cada recurso; ausencia de fonte ou teste nao conta como paridade.
 
 ## Fase 7 - Aceite e encerramento
-- [x] CI, race, integracoes PostgreSQL/brokers/S3, build e smoke multiarch aprovados para as mudancas incorporadas ate Go 514347c e Cloud 35ac0c4.
+- [x] CI, race, integracoes PostgreSQL/brokers/S3, build e smoke multiarch aprovados para as mudancas incorporadas ate Go e01698b e Cloud 35ac0c4.
+- [x] Restauracao offline do backup consistente da conta de teste: integridade dos cinco bancos SQLite, sem abrir uma segunda conexao WhatsApp.
 - [ ] Testes de carga/falha/restauracao com resultados registrados e metas aceitas.
 - [x] Mudancas implementadas publicadas a partir das fontes verificadas; health/logs/versao confirmados em 10/11/2026.
 - [ ] Checklist integral concluido com links de evidencia. Somente entao declarar 100%.
@@ -115,7 +117,8 @@ Os registros abaixo sao cronologicos: pendencias de um marco antigo podem estar 
 - Idempotencia: concorrencia, reinicio, falha de persistencia, timeout parcial, isolamento, rejeicao em imagens antigas e transporte do header por todos os proxies; depois smoke no artefato publicado.
 - DLQ: listar entregas falhas por sessao/destino, motivo sanitizado, replay seletivo sem repetir destinos concluidos, auditoria, metrica de idade/ocupacao e ensaio de indisponibilidade/recuperacao.
 - Paridade: implementar por jornada da matriz, com fixtures de protocolo e contrato; comparar resultado observavel e nao somente nome de rota. Marcar cada operacao somente depois de validar comportamento.
-- WhatsApp real: depende de conta de teste pareada e destinatario autorizado. Pergunta enviada ao usuario; ainda nao respondida. Nunca usar sessoes de clientes para envios de teste.
+- WhatsApp real: destinatario autorizado recebido; depende agora de conta de teste pareada. Nunca usar sessoes de clientes para envios de teste.
+- Atualizacao de aceite: destinatario autorizado recebido em 10/11/2026 e mantido em registro privado, sem publicar o telefone. Instancia Go isolada criada na imagem validada; QR apresentado ao usuario. Pareamento ainda pendente, nenhuma mensagem real enviada.
 - Fonte privada: todas as camadas da imagem foram inspecionadas e nao contêm o fonte completo. As extensoes publicas foram preservadas; recursos exclusivamente binarios precisam de implementacao propria ou fornecimento do fonte. Nao declarar clonagem integral.
 
 ## Confiabilidade incorporada - 2026-11-10
@@ -139,3 +142,29 @@ Os registros abaixo sao cronologicos: pendencias de um marco antigo podem estar 
 6. Carga e restauracao: medir CPU/RSS/disco, p95/p99, backlog e reconexao com perfis reproduziveis; restaurar backup consistente e repetir jornadas antes do aceite final.
 
 Cada jornada deve atualizar a matriz com SHA, contrato, teste, resultado e lacuna restante. As 303 operacoes do baseline continuam identificadas como baseline, sem substituir evidencia funcional por uma contagem de rotas novas.
+
+## Pareamento real - QR expirado
+- [x] Usuario informou "QR invalido ou expirado"; diagnostico confirmou instancia saudavel e ciclo anterior encerrado sem CONNECTED.
+- [x] Substituida imagem estatica do chat por pagina HTTPS temporaria, caminho privado aleatorio, validade de 30 minutos, sem cache e sem expor credencial do Manager.
+- [x] Verificados PNG atual e mudanca real da versao do QR. A pagina consulta o estado a cada segundo e reinicia o ciclo encerrado.
+- [x] Validado JavaScript efetivamente renderizado; erro de escape identificado e corrigido antes de entregar o link. Teste test-live-pairing.cjs aprovado para rotacao, ocultacao de QR antigo, estado conectado e expiracao.
+- [x] Confirmar CONNECTED depois do escaneamento: servidor confirmou conexao em 10/11/2026 19:19 UTC; usuario confirmou sucesso.
+- [x] Executar envio/recebimento reais autorizados. Primeiro envio retornou 502 e foi preservado no ledger sem reenvio automatico; apos a correcao, novo teste identificado de texto e arquivo recebeu HTTP 201, ACK de entrega/leitura e resposta real.
+- [x] Removidos helper HTTPS, rota e configuracao privada depois de confirmar CONNECTED. Timer de limpeza desativado; sessao de teste preservada. Recibo live-pairing-cleanup.json.
+- [x] Agendada limpeza automatica do helper expirado via timer systemd dedicado; limpeza antecipada apos pareamento concluida e timer desativado. Script verifica nome, label e diretorio antes de remover somente o helper e sua configuracao.
+
+## Correcao encontrada no aceite real
+- [x] Isolar falha de resolucao: probe sem envio confirmou GetUserInfo com perfil valido sem LID, ResolveLID recusando destinatario e IsOnWhatsApp retornando contato registrado em LID. Conta de teste diferente do destinatario; nenhum dado privado publicado.
+- [x] SDK: fallback para consulta de contatos quando perfil omite LID; exige correspondencia da consulta e um unico contato registrado em LID. Preserva device e mappings canonicos.
+- [x] Regressao reproduzida antes da correcao por serializacao e parsing reais de USync. Seis cenarios, suite completa e vet aprovados; CI Go antigo/atual, race, WASM, MEX e pre-commit aprovados na run 42886170997.
+- [x] HyperMeow PR #4 incorporado: d326350a86e98c405c9f6adf14cb6bd03ea8e66a. Fonte da correcao 44b882797ce70f44ce41d1d31d7461824d92a6c0.
+- [x] Atualizar dependencia do server-go, testar, incorporar e publicar imagem validada; repetir aceite real e renovar reservas. Server-go PR #20, main e01698bf3e8b0b9d9dc749e7ffbb49e65deab22f; CI 42887160468 aprovado.
+
+## Aceite real e pool atualizada - 2026-11-10
+- Imagem: sha256:b0d96f63e775038ff4c71cfdf4630763712fe8e978ff555dedb685cae8ed9b5b. Arquivo-fonte da main limpa: SHA256 17c5ed3a0018f94f2b3527b547ccc751b90092060067d62e402d43cb454e735e.
+- Canary isolado repetiu recuperacao de webhook, auditoria, isolamento, ledger e restart. Fonte conferida novamente antes do rollout. Evidencias recipient-fix-built.json e recipient-fix-canary.json.
+- Primeiro ensaio de troca da conta de teste falhou por alias configurado na rede bridge padrao. Script corrigido; imagem anterior restaurada com o volume preservado e CONNECTED confirmado. Segunda troca concluida com backup consistente, mesma porta/configuracao e pareamento preservado. Nao houve alteracao de sessoes de clientes.
+- Texto e arquivo entregues e lidos pelo destinatario autorizado; resposta exata de teste recebida pelo servidor. Repeticao da mesma chave recuperou resultado, alteracao de payload retornou 409, outro workspace nao acessou o resultado. Recibo publico sem identificadores: phone-acceptance-summary.json.
+- Restart preservou pareamento, os dois resultados bem-sucedidos e a falha inicial. Download do arquivo depois do restart identico byte a byte. Backup restaurado offline com integridade dos cinco bancos SQLite validada. Recibo phone-restart-validation.json.
+- Tres reservas anteriores renovadas por alocacoes de teste proprias e exclusao pelo Manager. Todas usam a nova imagem; Manager e worker saudaveis, sessao anterior preservada. Recibos recipient-fix-release.json, recipient-fix-live-pool.json e recipient-fix-final-audit.json.
+- Helper de pareamento, rota HTTPS, configuracao privada e container do probe removidos. Sessao Go de teste permanece pareada para as jornadas restantes. Fonte da imagem privada, logout, segunda conta, alertas, carga e paridade integral continuam com as limitacoes registradas acima.
