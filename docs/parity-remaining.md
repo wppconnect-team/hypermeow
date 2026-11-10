@@ -19,7 +19,7 @@ O ensaio de queda de processo e backlog foi incorporado em [server-go #28](https
 
 ## Comparação atualizada do servidor Node com o Go
 
-Em 10/11/2026, a principal do Node ainda apontava para `37b7bc1a662b`. Seu Swagger descreve 158 operações. O OpenAPI do Go em `43b76a436cea` descreve 161 operações em 156 caminhos. A interseção por **método e caminho literais** tem 81 operações. Restam 80 combinações exclusivas do Go e 77 exclusivas do Node. Essa contagem inclui capacidades experimentais ou indisponíveis quando presentes no contrato. [Swagger do Node](https://github.com/wppconnect-team/wppconnect-server/blob/37b7bc1a662b5262b8276597701f38c4dbcad58a/src/swagger.json) e [OpenAPI do Go](https://github.com/wppconnect-team/wppconnect-server-go/blob/43b76a436cea22af14504c6f53dbcdcdda0ee965/docs/openapi.json).
+Em 10/11/2026, a principal do Node ainda apontava para `37b7bc1a662b`. Seu Swagger descreve 158 operações. O OpenAPI do Go em `72c35ee4d7ce` descreve 161 operações em 156 caminhos. A interseção por **método e caminho literais** tem 81 operações. Restam 80 combinações exclusivas do Go e 77 exclusivas do Node. Essa contagem inclui capacidades experimentais ou indisponíveis quando presentes no contrato. [Swagger do Node](https://github.com/wppconnect-team/wppconnect-server/blob/37b7bc1a662b5262b8276597701f38c4dbcad58a/src/swagger.json) e [OpenAPI do Go](https://github.com/wppconnect-team/wppconnect-server-go/blob/72c35ee4d7ce15ceb0d822b6d25a2ce8a9119cb2/docs/openapi.json).
 
 Para reproduzir a contagem com os dois repositórios locais, execute `python docs/compare-server-contracts.py CAMINHO_GO CAMINHO_NODE`. O script lê os blobs Git fixados pelo plano, lista as contagens por jornada e identifica os candidatos abaixo.
 

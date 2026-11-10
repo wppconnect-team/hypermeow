@@ -1,6 +1,8 @@
 """Check the progress overlay against a local Server Go checkout. Does not send requests."""
 import argparse
 import json
+import re
+import subprocess
 from pathlib import Path
 
 def key_parameter(operation):
@@ -11,6 +13,8 @@ def key_parameter(operation):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("server_checkout", type=Path)
+    parser.add_argument("--run-fixtures", action="store_true",
+                        help="execute all mapped HTTP test functions and verify each actually passed")
     args = parser.parse_args()
     docs = Path(__file__).resolve().parent
     baseline = json.loads((docs / "parity-contract-matrix.compact.json").read_text(encoding="utf-8"))
@@ -20,6 +24,7 @@ def main():
     if len(operations) != overlay["baselineCount"]: raise ValueError("baseline count changed")
     sources = [p.read_text(encoding="utf-8") for p in (args.server_checkout / "internal/httpapi").glob("*_test.go")]
     seen = set()
+    fixtures = set()
     for item in overlay["entries"]:
         name = item["operation"]
         try:
@@ -42,10 +47,23 @@ def main():
                         or "200" not in lookup["responses"]):
                     raise ValueError("protected result lookup missing")
             if not any(("func " + item["fixture"] + "(") in s for s in sources): raise ValueError("contract test missing")
+            fixtures.add(item["fixture"])
             if item["liveEquivalence"] or item["evidence"] != "automated-contract" or not item["limit"]:
                 raise ValueError("automated evidence must retain a parity limitation")
         except (KeyError, ValueError) as err:
             raise SystemExit(f"{name}: {err}") from err
+    if args.run_fixtures:
+        pattern = "^(" + "|".join(re.escape(name) for name in sorted(fixtures)) + ")$"
+        run = subprocess.run(["go", "test", "-json", "-count=1", "-run", pattern, "./internal/httpapi"],
+                             cwd=args.server_checkout, stdout=subprocess.PIPE, text=True, encoding="utf-8")
+        events = [json.loads(line) for line in run.stdout.splitlines() if line.strip()]
+        passed = {event.get("Test") for event in events if event.get("Action") == "pass"}
+        if run.returncode or not fixtures.issubset(passed):
+            for event in events:
+                if event.get("Action") in ("output", "build-output"):
+                    print(event.get("Output", ""), end="")
+            raise SystemExit("Mapped fixtures without a pass: " + ", ".join(sorted(fixtures - passed)))
+        print(f"{len(fixtures)} distinct mapped HTTP fixtures passed.")
     print(f"{len(seen)} native contracts mapped against {len(operations)} baseline operations; no live equivalence inferred.")
 if __name__ == "__main__":
     main()

@@ -255,3 +255,8 @@ Os criterios de fechamento por entrega estao em [parity-remaining.md](docs/parit
 
 - [x] [Servidor Go #34](https://github.com/wppconnect-team/wppconnect-server-go/pull/34) incorporado. Após a perda da confirmação do upload, o arquivamento explícito verifica os bytes, a geração do objeto e a reserva da sessão. O ensaio após reinício rejeitou conteúdo alterado ou corrompido, e o [teste com MinIO real](https://github.com/wppconnect-team/wppconnect-server-go/actions/runs/42918653529/job/130187540165) confirmou um único upload.
 - [ ] Arquivamento automático por sessão. Faltam a seleção de anexos persistentes no recebimento e a fila com recuperação após falha.
+
+- [x] A revisão de recuperação S3 `43b76a436cea` passou no canary e chegou às três reservas Go. A auditoria de 23:06 UTC encontrou as três saudáveis e preservou a conexão anterior. Os objetos do teste ficaram no bucket temporário do MinIO no CI.
+- [x] O verificador da matriz executa as quatro funções de teste HTTP que cobrem os 15 contratos mapeados e exige aprovação explícita de cada uma. Um ensaio negativo com uma fixture marcada como pulada foi reprovado pelo verificador.
+
+- [x] [Servidor Go #35](https://github.com/wppconnect-team/wppconnect-server-go/pull/35) incorporado. Texto estendido marcado para visualização única perdeu a elegibilidade para encaminhamento ao Chatwoot. O histórico omite o marcador exclusivo do evento ao vivo, inclusive em linhas antigas. [CI do servidor](https://github.com/wppconnect-team/wppconnect-server-go/actions/runs/42919986810) e [integração Chatwoot 4.19.1](https://github.com/wppconnect-team/wppconnect-server-go/actions/runs/42919986661).

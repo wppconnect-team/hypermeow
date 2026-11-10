@@ -44,7 +44,11 @@ jobs:
           ref: ${{ steps.source.outputs.sha }}
           path: verified-server
           persist-credentials: false
-      - run: python3 docs/check-parity-progress.py verified-server
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: verified-server/go.mod
+          cache-dependency-path: verified-server/go.sum
+      - run: python3 docs/check-parity-progress.py verified-server --run-fixtures
       - uses: actions/checkout@v7
         with:
           repository: wppconnect-team/wppconnect-server
