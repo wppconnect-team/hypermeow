@@ -27,3 +27,9 @@ O teste [n8n 2.47.3](https://github.com/wppconnect-team/wppconnect-server-go/act
 A [sobreposição legível por máquina](parity-progress.json) referencia os IDs da matriz, os métodos nativos, campos obrigatórios, códigos HTTP, idempotência, nomes dos testes e limites de cada evidência. Execute `python docs/check-parity-progress.py CAMINHO_DO_SERVER_GO` para verificar o contrato de um checkout. O CI confere a revisão exata declarada em `serverRevision`; a verificação estática não substitui a execução dos testes nem o aceite em dispositivo.
 
 A [comparação das duas imagens](session-verification-benchmark.json) mede o endpoint de recuperação autenticada. O [canary da última imagem](session-cache-acceptance.json) e o [recibo da publicação do n8n](workflows-carousel-acceptance.json) distinguem as verificações na pool dos testes de protocolo. Os trabalhos restantes, critérios de aceite e adiamentos estão em [próximas entregas](parity-remaining.md).
+
+## Chatwoot
+
+O [adaptador de texto](https://github.com/wppconnect-team/wppconnect-server-go/blob/main/docs/chatwoot-text-relay.md) liga uma sessão Cloud a uma conversa existente em uma inbox de API. Para respostas públicas do atendente, o recibo aponta para a operação de envio da Cloud. Para texto direto recebido do WhatsApp, o identificador da mensagem permite consultar a gravação correspondente no Chatwoot após uma resposta incerta.
+
+No [teste com Chatwoot 4.19.1](https://github.com/wppconnect-team/wppconnect-server-go/actions/runs/42911977000/job/130164677043), o Chatwoot persistiu uma mensagem após duas entregas sintéticas do mesmo evento. O caminho inverso usou o callback assinado da aplicação e um servidor HTTP local para representar a Cloud. Contatos e conversas automáticos, anexos e entrega a um telefone seguem nos [critérios de aceite](parity-remaining.md).
