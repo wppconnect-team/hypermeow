@@ -59,3 +59,5 @@ No force-push or replacement of WPPConnect/HyperMeow-specific code is permitted.
 A conflicting or failing update remains unmerged and is reported with evidence.
 
 The phased Cloud and parity work is tracked in [PLAN.md](PLAN.md).
+
+See the [303-operation contract matrix](docs/parity-contract-matrix.md) for the fixed Zuck/Go/Node baseline, candidate adapters, limitations and acceptance criteria. A matching endpoint is not proof of functional parity.

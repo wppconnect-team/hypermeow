@@ -17,9 +17,9 @@ Nao declarar 100% enquanto houver requisito ou validacao pendente. Preservar tra
 - [x] Reservas do Manager filtram Node mesmo com configuracoes antigas.
 - [x] Worker gera apenas Go, sem reposicao de Evolution/Wuzapi/Node por env legado.
 - [x] Worker rejeita novas criacoes de outros providers antes de Docker/DB.
-- [ ] Preservar operacao/limpeza de sessoes existentes sem reatribuir volumes ou credenciais.
-- [ ] Testar defaults, env legado, pedido forjado, concorrencia e falhas de provisionamento.
-- [ ] Identificar ambiente em uso, configurar reserva Go, publicar fontes testadas e verificar pool real.
+- [x] Preservar operacao/limpeza de sessoes existentes sem reatribuir volumes ou credenciais.
+- [x] Testar defaults, env legado, pedido forjado, concorrencia e falhas de provisionamento.
+- [x] Identificar ambiente em uso, configurar reserva Go, publicar fontes testadas e verificar pool real.
 
 ## Fase 2 - Documentacao completa sem escolha de motor
 - [x] Exemplos de criacao com JSON minimo, sem provider/runtime obrigatorios.
@@ -33,14 +33,14 @@ Nao declarar 100% enquanto houver requisito ou validacao pendente. Preservar tra
 - [x] Documentar origem, escopo SDK vs servidor Zuck e modulos/imports para uso no Go.
 - [x] Rodar testes/vet/build e CI da base; registrar qualquer dependencia externa indisponivel.
 - [x] Publicar repositorio publico e conferir visibilidade/SHA/licencas.
-- [ ] Integrar atualizacoes de tulir preservando extensoes HyperMeow, com conflitos/testes resolvidos.
-- [ ] Validar adaptacao do server-go ao SDK antes de trocar dependencia em producao.
+- [x] Integrar atualizacoes de tulir preservando extensoes HyperMeow, com conflitos/testes resolvidos.
+- [x] Validar adaptacao do server-go ao SDK antes de trocar dependencia em producao.
 
 ## Fase 4 - Sincronizacao diaria
 - [x] Agendar comparacao diaria com tulir/whatsmeow as 09:30 America/Sao_Paulo.
-- [ ] Executar em checkout isolado, resolver principal no provedor e registrar SHAs de origem/destino.
+- [x] Executar em checkout isolado, resolver principal no provedor e registrar SHAs de origem/destino.
 - [x] Preservar patches e licencas; nunca usar reset/push force para igualar forks.
-- [ ] Testar, incorporar e enviar atualizacoes compativeis; falhas ficam registradas sem promover.
+- [x] Testar, incorporar e enviar atualizacoes compativeis; falhas ficam registradas sem promover.
 - [x] Executar primeira comparacao agora e validar configuracao da tarefa agendada.
 
 ## Fase 5 - Integracao Cloud e confiabilidade
@@ -51,8 +51,8 @@ Nao declarar 100% enquanto houver requisito ou validacao pendente. Preservar tra
 - [ ] Testes reais de QR/phone, reconexao, envio/recebimento/midia/ACK/logout e dois tenants.
 
 ## Fase 6 - Paridade funcional Zuck
-- [ ] Converter inventario de 303 operacoes em matriz executavel de contratos e criterios por jornada.
-- [ ] SDK: incorporar recursos publicos HyperMeow e identificar extensoes privadas nao presentes.
+- [x] Converter inventario de 303 operacoes em matriz executavel de contratos e criterios por jornada.
+- [x] SDK: incorporar recursos publicos HyperMeow e identificar extensoes privadas nao presentes.
 - [ ] Adaptadores de contatos, grupos/comunidades, newsletters, status e midia.
 - [ ] Integracoes Chatwoot/n8n, SQS/Redis Streams e armazenamento automatico de midia.
 - [ ] Comercio: catalogos/produtos/pedidos/pagamentos com contratos e idempotencia.
@@ -81,3 +81,19 @@ Nao declarar 100% enquanto houver requisito ou validacao pendente. Preservar tra
 - Worker: 13 testes, 3 smokes e build TypeScript aprovados. PR https://github.com/joaosouz4dev/wppconnect-cloud-manager-worker/pull/6.
 - Manager: 14 testes unitarios aprovados; integracoes locais nao executaram por falta de PostgreSQL (ECONNREFUSED). CI com banco isolado pendente. PR https://github.com/joaosouz4dev/wppconnect-cloud-manager/pull/5.
 - Guia operacional esta versionado nos PRs; publicacao no ambiente Cloud continua pendente na fase 1.
+
+## Publicacao Cloud Go-only - 2026-11-10
+- Cloud main 70c00e087ccc12d0235fb0ee0ab58dbb7f16dec7, deployment dpl_QKxcN2iGNJZ1LF2Xq6raKu9JWfVg. Dominio confirmado; /docs HTTP 200, criacao anonima HTTP 401. Evidencia cloud-release.json.
+- Manager main 3ade44f97868c008c30a1e0894f9636cfa851c51; worker main f87a9a9b9d18579f5f1aa8521a125c75a8c3e9cb. CI aprovado, inclusive PostgreSQL, concorrencia e rollback. Imagens e versoes anteriores em go-only-services-release.json.
+- Canary: rejeicao de criacao nao-Go no worker/Manager, autenticacao, bancos e proxy da sessao existente aprovados. Containers temporarios removidos; evidencia go-only-service-canary.json.
+- Producao: WPP_RUNTIME_POOLS=go:go=3, tres reservas Go, pedido Node HTTP 422, sessao antiga CONNECTED. Outros containers do host preservados.
+- Smoke real com workspace isolado: criacao minima HTTP 200/Go, QR PNG valido, outro tenant HTTP 404, cota HTTP 409, exclusao de teste concluida e reposicao automatica para tres reservas Go. Nao houve envio de mensagens nem pareamento de conta de cliente.
+- Integracao HyperMeow com tulir em PR https://github.com/wppconnect-team/hypermeow/pull/1; 15 conflitos resolvidos e testes locais aprovados; CI/race pendentes. Ainda nao promovida a main.
+
+## SDK e contratos - 2026-11-10
+- HyperMeow sincronizado com tulir c88388f: PR #1 incorporado, merge aae5d9a62408c202fb4dd2f91394153c054a110b. CI Go 1.26/1.27, race, WASM, MEX e pre-commit aprovados nas runs 42866085986 e 42866095663.
+- HMAC server-go: PR #15 incorporado, merge 36e41bc; CI 42865161731 aprovado com race, brokers/S3 e smoke amd64/arm64. Ainda nao altera a imagem 0.1.11 da pool.
+- Adapter HyperMeow server-go: PR #16 incorporado, merge dc8d124. CI 42866854308 aprovado com race, integracoes e imagens das duas arquiteturas. Modulo remoto fixado em 0987e7d211c8.
+- Teste SQLite reproduziu duplicate column na migracao da base anterior v16. Corrigido no SDK e validado com preservacao de chaves Noise/identidade/ADV, segredo WASA, indice faltante e upgrade repetido.
+- Matriz estruturada com 303 operacoes e 20 jornadas: parity-contract-matrix.md / .json. Versao publica compacta lossless 482233 bytes, validada por expansao e comparacao integral. Todas as operacoes seguem functionalParityValidated:false no baseline pesquisado; nao sao testes de mensagens reais.
+- Webhook por sessao: implementacao em branches server-cloud-webhooks e worker-webhooks, com receiver dedicado, segredo e restricao de egress HTTPS publico; rollout e verificacao ponta a ponta pendentes.
