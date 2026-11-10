@@ -49,15 +49,26 @@ Os registros abaixo sao cronologicos: pendencias de um marco antigo podem estar 
 - [x] Implementar HMAC opcional nos webhooks globais do Go, com testes e documentacao.
 - [x] Idempotencia persistida de envio, recuperacao de resposta e bloqueio de reenvio ambiguo; incerteza do protocolo continua explicita.
 - [x] Falhas de entrega: consulta por sessao/destino/estado, replay seletivo auditado e metricas de backlog/capacidade, com testes de falha e recuperacao.
-- [ ] Instalar regras de alerta no monitoramento operacional e validar acionamento/recuperacao com o destino de notificacao definido.
+- [ ] ADIADO pelo usuario em 10/11/2026: nenhum monitoramento ou destino de notificacao por ora. Nao instalar nem disparar alertas operacionais; as regras seguem como exemplos e nao ha entrega validada.
 - [x] Conta de teste real: QR, reconexao, texto/arquivo, ACK de entrega/leitura, resposta recebida, idempotencia e download de midia depois de restart. Outro workspace recebe 404.
-- [ ] Logout e jornadas com duas contas pareadas; testes de pareamento por codigo de telefone separados do QR.
+- [ ] Logout e pareamento por codigo de telefone separados do QR.
+- [ ] ADIADO pelo usuario em 10/11/2026: jornadas com segunda conta pareada e validacao Android/iPhone/Web. Nao bloqueiam a implementacao automatizada; nao contam como aprovadas.
 
 ## Fase 6 - Paridade funcional Zuck
 - [x] Converter inventario de 303 operacoes em matriz executavel de contratos e criterios por jornada.
 - [x] SDK: incorporar recursos publicos HyperMeow e identificar extensoes privadas nao presentes.
 - [ ] Adaptadores de contatos, grupos/comunidades, newsletters, status e midia.
+- [x] J10: corrigir espera/cancelamento de ACK de visualizacoes no SDK antes de expor a operacao.
+- [x] J10 no server-go (contratos locais com cliente de teste): convites, reacoes, visualizacoes e atualizacoes de mensagens com contratos estritos, isolamento e idempotencia nas mutacoes.
+- [x] J10: protocolo de ACK no SDK, fixtures HTTP/SQLite no Go, OpenAPI e guia nativo; CI aprovado e fontes incorporadas.
+- [x] J10 na Cloud: escopos separados para leitura, escrita e administracao, resultados isolados, documentacao PT/EN e testes de navegador/build/CI.
+- [x] J10: publicar a imagem no worker e renovar/verificar as tres reservas em Go; smoke pelo Manager sem telefone pareado.
+- [x] J10: Cloud 5b9f3e8 publicada; /docs em portugues com o contrato de canais, quatro rotas protegidas responderam 401 e rota desconhecida 404.
+- [ ] J10: aceite de owner/subscriber em duas contas e nos clientes Android/iPhone/Web adiado pelo usuario.
+- [ ] Redis Streams: testar rejeicao/recuperacao com Redis real, verificar retencao e incorporar.
 - [ ] Integracoes Chatwoot/n8n, SQS/Redis Streams e armazenamento automatico de midia.
+- [x] J11 no server-go (contrato local): catalogo proprio, produto e colecoes, limite e cursor, escopo da conta e preco sem conversao.
+- [ ] J11: CI, publicacao e aceite com catalogo Business real.
 - [ ] Comercio: catalogos/produtos/pedidos/pagamentos com contratos e idempotencia.
 - [ ] Interativos modernos: botoes/listas/carrosseis/flows com teste Android/iOS/Web.
 - [ ] Chamadas: sinalizacao/audio/video/grupos, autenticacao de streams e limites de recursos.
@@ -168,3 +179,15 @@ Cada jornada deve atualizar a matriz com SHA, contrato, teste, resultado e lacun
 - Restart preservou pareamento, os dois resultados bem-sucedidos e a falha inicial. Download do arquivo depois do restart identico byte a byte. Backup restaurado offline com integridade dos cinco bancos SQLite validada. Recibo phone-restart-validation.json.
 - Tres reservas anteriores renovadas por alocacoes de teste proprias e exclusao pelo Manager. Todas usam a nova imagem; Manager e worker saudaveis, sessao anterior preservada. Recibos recipient-fix-release.json, recipient-fix-live-pool.json e recipient-fix-final-audit.json.
 - Helper de pareamento, rota HTTPS, configuracao privada e container do probe removidos. Sessao Go de teste permanece pareada para as jornadas restantes. Fonte da imagem privada, logout, segunda conta, alertas, carga e paridade integral continuam com as limitacoes registradas acima.
+
+
+## Canais e integracoes - 2026-11-10
+
+- [HyperMeow #6](https://github.com/wppconnect-team/hypermeow/pull/6): cancelamento, desconexao e ACK negativo nao produzem sucesso de visualizacao. CI 42893049289; main 099af656ac43dcd4b3e2688f8a880ee76e2c4e75.
+- [Server Go #21](https://github.com/wppconnect-team/wppconnect-server-go/pull/21): oito operacoes, seis mutacoes com ledger persistente e duas consultas separadas de resultado. Testes de contrato HTTP, isolamento, permissao e replay; CI 42895236212 com race, integracoes e imagens amd64/arm64. Main 4fb3d7f13de475af0e6fa7bcd89b733b12105121. [Guia de canais](https://github.com/wppconnect-team/wppconnect-server-go/blob/main/docs/newsletters.pt-BR.md).
+- [Cloud #40](https://github.com/joaosouz4dev/wppconnect-cloud/pull/40): 49 testes, controle de escopos, typecheck, build e CI 42895717043. Chromium: guia em ingles (1440 px) e portugues (375 px), link do contrato, foco de teclado e largura da secao conferidos.
+- [Server Go #22](https://github.com/wppconnect-team/wppconnect-server-go/pull/22): adaptador Redis Streams opcional, fixture de Redis real no CI, inspecao e replay por destino. Nenhuma fila ou stream de cliente configurado.
+- A matriz original continua sendo o retrato de 303 operacoes da versao comparada. Nomes e payloads sao nativos; Z025 nao tem filtro before no SDK. A reacao recebe 202 sem ACK remoto e um convite administrativo nao concede o papel.
+
+- Canary do binario e rollout das tres reservas Go aprovados: SHA da imagem 59f610bd5d2060cd4b1eecff4ac134f7a41a49d696e97bdac68461b4eeff508a. Auditoria 20:41 UTC: tres reservas healthy, containers temporarios removidos e nenhum OOM, panic, fatal ou falha de persistencia nos logs verificados. A conta de testes pareada e a alocacao preexistente foram preservadas.
+- [Server Go #23](https://github.com/wppconnect-team/wppconnect-server-go/pull/23): leitura do catalogo proprio, produtos e resumos de colecoes. Testes locais de escopo, preco/moeda, visibilidade falsa, cursor, limites e erros aprovados.
