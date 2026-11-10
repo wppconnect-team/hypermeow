@@ -428,7 +428,21 @@ func (cli *Client) ResolveLID(ctx context.Context, phone types.JID) (types.JID, 
 	}
 	lid = info[phone].LID.ToNonAD()
 	if lid.IsEmpty() {
-		return types.EmptyJID, fmt.Errorf("%w: USync returned no LID for %s", ErrRecipientNotOnWhatsApp, phone)
+		// Profile USync can omit the LID of a registered phone. Contact
+		// discovery returns the recipient in LID addressing mode and also
+		// handles phone aliases, without guessing a different phone number.
+		query := "+" + phone.User
+		contacts, lookupErr := cli.IsOnWhatsApp(ctx, []string{query})
+		if lookupErr != nil {
+			return types.EmptyJID, fmt.Errorf("resolve LID for %s with contact USync: %w", phone, lookupErr)
+		}
+		if len(contacts) != 1 || strings.TrimPrefix(contacts[0].Query, "+") != phone.User ||
+			!contacts[0].IsIn || contacts[0].JID.Server != types.HiddenUserServer || contacts[0].JID.IsEmpty() {
+			return types.EmptyJID, fmt.Errorf("%w: contact USync returned no matching LID for %s", ErrRecipientNotOnWhatsApp, phone)
+		}
+		lid = contacts[0].JID.ToNonAD()
+		// IsOnWhatsApp persists only server-provided PN/LID pairs. Do not
+		// overwrite a canonical PN mapping with the queried phone alias.
 	}
 	lid.Device = device
 	return lid, nil
