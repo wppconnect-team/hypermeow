@@ -1,0 +1,39 @@
+"""Check the progress overlay against a local Server Go checkout. Does not send requests."""
+import argparse
+import json
+from pathlib import Path
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("server_checkout", type=Path)
+    args = parser.parse_args()
+    docs = Path(__file__).resolve().parent
+    baseline = json.loads((docs / "parity-contract-matrix.compact.json").read_text(encoding="utf-8"))
+    overlay = json.loads((docs / "parity-progress.json").read_text(encoding="utf-8"))
+    spec = json.loads((args.server_checkout / "docs/openapi.json").read_text(encoding="utf-8"))
+    operations = {op["id"]: op for op in baseline["operations"]}
+    if len(operations) != overlay["baselineCount"]: raise ValueError("baseline count changed")
+    sources = [p.read_text(encoding="utf-8") for p in (args.server_checkout / "internal/httpapi").glob("*_test.go")]
+    seen = set()
+    for item in overlay["entries"]:
+        name = item["operation"]
+        try:
+            if name in seen: raise ValueError("duplicate entry")
+            seen.add(name)
+            journeys = {operations[z]["journey"] for z in item["refs"]}
+            if not journeys or journeys != set(item["journeys"]): raise ValueError("baseline journey mismatch")
+            op = spec["paths"]["/api/{session}/" + name][item["method"]]
+            if not op.get("security") or op.get("x-implemented") is not True: raise ValueError("unprotected or unsupported")
+            if str(item["success"]) not in op["responses"]: raise ValueError("success status missing")
+            body = op["requestBody"]["content"]["application/json"]["schema"]
+            if set(body.get("required", [])) != set(item["required"]): raise ValueError("required fields changed")
+            keyed = any(p.get("in")=="header" and p.get("name")=="Idempotency-Key" for p in op["parameters"])
+            if keyed != item["idempotency"]: raise ValueError("idempotency header changed")
+            if not any(("func " + item["fixture"] + "(") in s for s in sources): raise ValueError("contract test missing")
+            if item["liveEquivalence"] or item["evidence"] != "automated-contract" or not item["limit"]:
+                raise ValueError("automated evidence must retain a parity limitation")
+        except (KeyError, ValueError) as err:
+            raise SystemExit(f"{name}: {err}") from err
+    print(f"{len(seen)} native contracts mapped against {len(operations)} baseline operations; no live equivalence inferred.")
+if __name__ == "__main__":
+    main()

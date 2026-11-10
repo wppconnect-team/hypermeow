@@ -23,3 +23,5 @@ O [recibo de canary, pool e navegador](channels-acceptance-2026-11-10.json) não
 | J05: Z126 | Carrossel experimental de imagens e respostas rápidas, montado pelo SDK. Testes de JSON, upload, protobuf, autorização e replay. | Vídeo, outros controles, entrega e apresentação em Android/iPhone/Web. |
 
 O teste [n8n 2.47.3](https://github.com/wppconnect-team/wppconnect-server-go/actions/runs/42902244064/job/130130987174) importou e publicou o workflow, rejeitou uma credencial inválida, aceitou a credencial da fixture e retornou somente ID do evento, nome e sessão. Nenhum evento foi enviado a um n8n de cliente.
+
+A [sobreposição legível por máquina](parity-progress.json) referencia os IDs da matriz, os métodos nativos, campos obrigatórios, códigos HTTP, idempotência, nomes dos testes e limites de cada evidência. Execute `python docs/check-parity-progress.py CAMINHO_DO_SERVER_GO` para verificar o contrato de um checkout. O CI confere a revisão exata declarada em `serverRevision`; a verificação estática não substitui a execução dos testes nem o aceite em dispositivo.
