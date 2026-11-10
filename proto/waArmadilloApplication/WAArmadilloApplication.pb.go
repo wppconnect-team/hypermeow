@@ -7,13 +7,15 @@
 package waArmadilloApplication
 
 import (
-	waArmadilloXMA "github.com/polymorfa/hypermeow/proto/waArmadilloXMA"
-	waCommon "github.com/polymorfa/hypermeow/proto/waCommon"
-	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
-	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
+
+	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
+	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+
+	waArmadilloXMA "github.com/polymorfa/hypermeow/proto/waArmadilloXMA"
+	waCommon "github.com/polymorfa/hypermeow/proto/waCommon"
 )
 
 const (

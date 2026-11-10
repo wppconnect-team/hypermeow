@@ -7,6 +7,13 @@
 package waE2E
 
 import (
+	reflect "reflect"
+	sync "sync"
+	unsafe "unsafe"
+
+	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
+	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+
 	waAICommon "github.com/polymorfa/hypermeow/proto/waAICommon"
 	waAICommonDeprecated "github.com/polymorfa/hypermeow/proto/waAICommonDeprecated"
 	waAdv "github.com/polymorfa/hypermeow/proto/waAdv"
@@ -16,11 +23,6 @@ import (
 	waMmsRetry "github.com/polymorfa/hypermeow/proto/waMmsRetry"
 	waServerSync "github.com/polymorfa/hypermeow/proto/waServerSync"
 	waStatusAttributions "github.com/polymorfa/hypermeow/proto/waStatusAttributions"
-	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
-	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	reflect "reflect"
-	sync "sync"
-	unsafe "unsafe"
 )
 
 const (
@@ -28002,9 +28004,9 @@ var file_waE2E_WAWebProtobufsE2E_proto_goTypes = []any{
 	(PeerDataOperationRequestResponseMessage_PeerDataOperationResult_FullHistorySyncOnDemandResponseCode)(0), // 43: WAWebProtobufsE2E.PeerDataOperationRequestResponseMessage.PeerDataOperationResult.FullHistorySyncOnDemandResponseCode
 	(PeerDataOperationRequestMessage_GalaxyFlowAction_GalaxyFlowActionType)(0),                               // 44: WAWebProtobufsE2E.PeerDataOperationRequestMessage.GalaxyFlowAction.GalaxyFlowActionType
 	(PeerDataOperationRequestMessage_HistorySyncOnDemandRequest_Mode)(0),                                     // 45: WAWebProtobufsE2E.PeerDataOperationRequestMessage.HistorySyncOnDemandRequest.Mode
-	(SharedDeviceContactHashKey_Kind)(0),                                                                     // 46: WAWebProtobufsE2E.SharedDeviceContactHashKey.Kind
-	(RequestWelcomeMessageMetadata_WelcomeTrigger)(0),                                                        // 47: WAWebProtobufsE2E.RequestWelcomeMessageMetadata.WelcomeTrigger
-	(RequestWelcomeMessageMetadata_LocalChatState)(0),                                                        // 48: WAWebProtobufsE2E.RequestWelcomeMessageMetadata.LocalChatState
+	(SharedDeviceContactHashKey_Kind)(0),                                  // 46: WAWebProtobufsE2E.SharedDeviceContactHashKey.Kind
+	(RequestWelcomeMessageMetadata_WelcomeTrigger)(0),                     // 47: WAWebProtobufsE2E.RequestWelcomeMessageMetadata.WelcomeTrigger
+	(RequestWelcomeMessageMetadata_LocalChatState)(0),                     // 48: WAWebProtobufsE2E.RequestWelcomeMessageMetadata.LocalChatState
 	(ProtocolMessage_Type)(0),                                             // 49: WAWebProtobufsE2E.ProtocolMessage.Type
 	(CloudAPIThreadControlNotification_CloudAPIThreadControl)(0),          // 50: WAWebProtobufsE2E.CloudAPIThreadControlNotification.CloudAPIThreadControl
 	(VideoMessage_VideoSourceType)(0),                                     // 51: WAWebProtobufsE2E.VideoMessage.VideoSourceType
