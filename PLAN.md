@@ -3,6 +3,7 @@
 Inicio: 2026-11-10. Responsavel: joaosouz4dev. Atualizar os checkboxes somente com evidencia.
 [x] significa concluido e verificado no escopo descrito; publicacao e testes reais tem itens separados.
 Nao declarar 100% enquanto houver requisito ou validacao pendente. Preservar trabalho local existente.
+Os registros abaixo sao cronologicos: pendencias de um marco antigo podem estar encerradas nos marcos seguintes. O checklist e o ultimo registro indicam o estado atual.
 
 ## Fase 0 - Base e rastreabilidade
 - [x] Comparar Go, Node e imagem Zuck v2.4.2 por revisoes/digests fixos.
@@ -44,10 +45,11 @@ Nao declarar 100% enquanto houver requisito ou validacao pendente. Preservar tra
 - [x] Executar primeira comparacao agora e validar configuracao da tarefa agendada.
 
 ## Fase 5 - Integracao Cloud e confiabilidade
-- [ ] Corrigir webhook por sessao na ativacao do pool, inclusive webhookUrl/webhook, restart e isolamento.
+- [x] Corrigir webhook por sessao na ativacao do pool, inclusive webhookUrl/webhook, restart e isolamento.
 - [x] Implementar HMAC opcional nos webhooks globais do Go, com testes e documentacao.
-- [ ] Idempotencia persistida de envio e recuperacao de resultado ambiguo.
-- [ ] Falhas de entrega: DLQ, filtros, replay auditado, metricas e alarmes de backlog.
+- [x] Idempotencia persistida de envio, recuperacao de resposta e bloqueio de reenvio ambiguo; incerteza do protocolo continua explicita.
+- [x] Falhas de entrega: consulta por sessao/destino/estado, replay seletivo auditado e metricas de backlog/capacidade, com testes de falha e recuperacao.
+- [ ] Instalar regras de alerta no monitoramento operacional e validar acionamento/recuperacao com o destino de notificacao definido.
 - [ ] Testes reais de QR/phone, reconexao, envio/recebimento/midia/ACK/logout e dois tenants.
 
 ## Fase 6 - Paridade funcional Zuck
@@ -61,9 +63,9 @@ Nao declarar 100% enquanto houver requisito ou validacao pendente. Preservar tra
 - [ ] Testes de protocolo para cada recurso; ausencia de fonte ou teste nao conta como paridade.
 
 ## Fase 7 - Aceite e encerramento
-- [ ] CI, race, integracoes PostgreSQL/brokers/S3, build e smoke multiarch aprovados.
+- [x] CI, race, integracoes PostgreSQL/brokers/S3, build e smoke multiarch aprovados para as mudancas incorporadas ate Go 514347c e Cloud 35ac0c4.
 - [ ] Testes de carga/falha/restauracao com resultados registrados e metas aceitas.
-- [ ] Repositorios e ambientes publicados a partir das fontes verificadas; health/logs/versao confirmados.
+- [x] Mudancas implementadas publicadas a partir das fontes verificadas; health/logs/versao confirmados em 10/11/2026.
 - [ ] Checklist integral concluido com links de evidencia. Somente entao declarar 100%.
 
 ## Evidencias
@@ -97,3 +99,43 @@ Nao declarar 100% enquanto houver requisito ou validacao pendente. Preservar tra
 - Teste SQLite reproduziu duplicate column na migracao da base anterior v16. Corrigido no SDK e validado com preservacao de chaves Noise/identidade/ADV, segredo WASA, indice faltante e upgrade repetido.
 - Matriz estruturada com 303 operacoes e 20 jornadas: parity-contract-matrix.md / .json. Versao publica compacta lossless 482233 bytes, validada por expansao e comparacao integral. Todas as operacoes seguem functionalParityValidated:false no baseline pesquisado; nao sao testes de mensagens reais.
 - Webhook por sessao: implementacao em branches server-cloud-webhooks e worker-webhooks, com receiver dedicado, segredo e restricao de egress HTTPS publico; rollout e verificacao ponta a ponta pendentes.
+
+## Webhooks publicados e verificados - 2026-11-10
+- Server-go PR #17 e worker PR #7 incorporados apos CI aprovado. Go main 0878a10e51beae17fa199e2abd9b76ddf0f59ac1; worker main 95aa5d279778e84707b5bfde886cdd455bee48fe.
+- Imagens construidas de arquivos git de checkouts limpos e hashes conferidos. Go sha256:e249ddc5d0f6a06d65cce3e63e178cc25b68cbf597b0bf41871b869430a21e8a; worker sha256:031ccfa74a61b0e176210d0cbefafdf4e5f7b21dca363b4ee392eea953605fef.
+- Canary real: dois receptores HTTPS com chaves distintas, assinatura validada sobre corpo original, primeira entrega 503 seguida de retry com ID estavel, zero assinaturas invalidas, nenhum evento cruzado, restart preservado. Producao e pool preservadas. Evidencia webhooks-canary.json.
+- Rollout: GO_SESSION_WEBHOOKS_ENABLED=true e imagem nova para futuras criacoes. Tres reservas anteriores e sessao Node CONNECTED preservadas. Backup privado registrado em webhooks-release.json.
+- Manager real: criacao com webhook em 5,91 segundos, QR PNG, webhook assinado, outro workspace 404, cota 409, exclusao concluida. Nenhum telefone pareado. Evidencia webhooks-live-smoke.json.
+- Receptor HTTPS temporario, rota e segredos de teste removidos. Evidencia webhooks-cleanup.json.
+- Cloud PR #38 incorporado. Documentacao PT/EN publicada em https://cloud.wppconnect.io/docs; HTTP 200 e exemplo webhookSecret confirmado. Deployment dpl_Bdf6d87gR9EaGcUjEtmnizxoQ73j, fonte e895a7d. 43 testes, build e CI aprovados.
+- HyperMeow PR #2 incorporado: matriz publica completa e testes herdados restaurados, CI Go antigo/atual aprovado.
+- Proxima etapa em andamento: ledger persistido de comandos de envio, com chave por sessao, recuperacao de resposta e bloqueio de reenvio ambiguo. Branch server-idempotency; testes focados aprovados, suite completa/CI/rollout ainda pendentes.
+
+## Criterios de fechamento das lacunas restantes
+- Idempotencia: concorrencia, reinicio, falha de persistencia, timeout parcial, isolamento, rejeicao em imagens antigas e transporte do header por todos os proxies; depois smoke no artefato publicado.
+- DLQ: listar entregas falhas por sessao/destino, motivo sanitizado, replay seletivo sem repetir destinos concluidos, auditoria, metrica de idade/ocupacao e ensaio de indisponibilidade/recuperacao.
+- Paridade: implementar por jornada da matriz, com fixtures de protocolo e contrato; comparar resultado observavel e nao somente nome de rota. Marcar cada operacao somente depois de validar comportamento.
+- WhatsApp real: depende de conta de teste pareada e destinatario autorizado. Pergunta enviada ao usuario; ainda nao respondida. Nunca usar sessoes de clientes para envios de teste.
+- Fonte privada: todas as camadas da imagem foram inspecionadas e nao contêm o fonte completo. As extensoes publicas foram preservadas; recursos exclusivamente binarios precisam de implementacao propria ou fornecimento do fonte. Nao declarar clonagem integral.
+
+## Confiabilidade incorporada - 2026-11-10
+- Server-go PR #18: ledger persistido de envio com chave por sessao, fingerprint do corpo/rota/Content-Type, resposta recuperavel, reserva antes do efeito de protocolo, bloqueio de reenvio em resultado incerto e limites de armazenamento. CI 42873726008 aprovado, incluindo race e imagens multiarch. Merge c29f4ac.
+- Server-go PR #19: filtros de entregas por destino/estado, motivo sanitizado, retry somente de destino falho, auditoria transacional, migracao da base anterior e metricas de idade/capacidade. CI 42875435897 aprovado. Main 514347cd5e7dd69348a1ef1d63e51f31ae29cf14.
+- Cloud PR #39: preservacao de Idempotency-Key, consulta send-result e verificacao previa do ledger para recusar imagens antigas sem enviar. 48 testes, build e CI aprovados. Main 35ac0c4080dd375a3efa1625567e55d93c856958; deployment dpl_ATXHSjh4bJDtWKBKoQC5CrvT4M6R publicado e /docs conferido HTTP 200.
+- Imagem Go sha256:e2c292c3259007d8d74c72422b847510ab2c75d43692e5dfb265345523dcb2ec, construida da main limpa e arquivo-fonte SHA256 c0c105975fab5eb167cedfdf2fac1b124480d2c775e7179846d283e65a8b86c3.
+- Canary real da imagem: falhas HTTP repetidas, estado failed/retry_exhausted, recuperacao seletiva com assinatura valida, auditoria, bloqueio entre sessoes, metricas, resultado idempotente, conflito de payload e persistencia apos restart. Nenhuma mensagem enviada e nenhum telefone pareado. Fixtures e rede temporaria removidas; producao preservada.
+- Primeiro ensaio abortou durante conexao inicial reiniciada no boot. O script foi corrigido para aguardar esse estado transitorio; ensaio completo seguinte aprovado. Nao foi uma falha funcional ocultada.
+- Regras Prometheus foram documentadas como exemplos, sem declarar monitoramento instalado. Essa ativacao permanece pendente e separada da implementacao de metricas.
+- Rollout e renovacao das tres reservas concluidos via alocacoes de teste proprias, sem apagar reservas diretamente. Todas usam a imagem e2c292c3. Smoke pelo Manager confirmou transporte da chave, recuperacao de resposta e conflito de payload; alocacoes de teste excluidas. Recibo reliability-live-pool.json.
+- Auditoria final 18:46 UTC: Manager/worker em execucao, tres Go healthy, nenhum OOM, panic/fatal/falha de persistencia nos dez minutos consultados, sessao antiga CONNECTED e containers temporarios ausentes. Recibo reliability-final-audit.json.
+- Esses smokes usaram contas nao pareadas e payloads invalidos para nao enviar mensagens reais. O protocolo de envio foi exercitado com clientes simulados nos testes; recebimento real em telefone permanece pendente.
+
+## Sequencia da fase de paridade funcional
+1. Contatos, grupos/comunidades e newsletters: partir dos adaptadores ja existentes e da matriz, fechar diferencas de payload, ownership, paginacao e eventos. Aceite com fixtures de protocolo e duas contas de teste.
+2. Midia e integracoes: persistencia automatica e retencao, Chatwoot/n8n, Redis Streams/SQS; testar indisponibilidade, recuperacao, duplicatas e limites antes de publicar cada adaptador.
+3. Comercio: leitura de catalogo/produto antes de mutacoes e pedidos. Preservar moeda/unidade, diferenciar aceite de protocolo de pagamento confirmado e usar idempotencia nas mutacoes suportadas.
+4. Interativos: validar botoes/listas, depois carrosseis/flows, com fixtures e recebimento observado em Android, iOS e Web. Nao converter resposta HTTP aceita em paridade comprovada.
+5. Chamadas: separar rejeicao/sinalizacao de transporte de audio/video e chamadas de grupo. Exigir autenticacao de streams, limites, limpeza, codec compativel e teste real de ponta a ponta.
+6. Carga e restauracao: medir CPU/RSS/disco, p95/p99, backlog e reconexao com perfis reproduziveis; restaurar backup consistente e repetir jornadas antes do aceite final.
+
+Cada jornada deve atualizar a matriz com SHA, contrato, teste, resultado e lacuna restante. As 303 operacoes do baseline continuam identificadas como baseline, sem substituir evidencia funcional por uma contagem de rotas novas.
