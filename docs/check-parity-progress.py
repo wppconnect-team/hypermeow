@@ -3,6 +3,11 @@ import argparse
 import json
 from pathlib import Path
 
+def key_parameter(operation):
+    return next((p for p in operation["parameters"]
+                 if p.get("in") == "header" and p.get("name") == "Idempotency-Key"), None)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("server_checkout", type=Path)
@@ -27,8 +32,15 @@ def main():
             if str(item["success"]) not in op["responses"]: raise ValueError("success status missing")
             body = op["requestBody"]["content"]["application/json"]["schema"]
             if set(body.get("required", [])) != set(item["required"]): raise ValueError("required fields changed")
-            keyed = any(p.get("in")=="header" and p.get("name")=="Idempotency-Key" for p in op["parameters"])
-            if keyed != item["idempotency"]: raise ValueError("idempotency header changed")
+            key = key_parameter(op)
+            if bool(key) != item["idempotency"]: raise ValueError("idempotency header changed")
+            if item.get("requireKey"):
+                if not key or not key.get("required"): raise ValueError("required idempotency header missing")
+                lookup = spec["paths"]["/api/{session}/" + item["resultOperation"]]["get"]
+                if (not lookup.get("security") or lookup.get("x-implemented") is not True
+                        or not (key_parameter(lookup) or {}).get("required")
+                        or "200" not in lookup["responses"]):
+                    raise ValueError("protected result lookup missing")
             if not any(("func " + item["fixture"] + "(") in s for s in sources): raise ValueError("contract test missing")
             if item["liveEquivalence"] or item["evidence"] != "automated-contract" or not item["limit"]:
                 raise ValueError("automated evidence must retain a parity limitation")
