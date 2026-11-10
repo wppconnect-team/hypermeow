@@ -74,3 +74,24 @@ func TestNodeStringRedactsLinkedAccountPayload(t *testing.T) {
 		t.Fatalf("unexpected linked-account redaction: %s", logged)
 	}
 }
+
+func TestNodeStringRedactsMediaAndRelayWithoutMutatingPayload(t *testing.T) {
+	relay := Node{Tag: "relay", Content: []Node{
+		{Tag: "auth_token", Content: []byte("relay-secret")},
+		{Tag: "key", Content: []byte("relay-key")},
+		{Tag: "hbh_key", Content: []byte("hop-secret")},
+	}}
+	media := Node{Tag: "media_conn", Attrs: Attrs{"ip_token": "ip-secret", "auth": "auth-secret", "host": "example.invalid"}}
+	logged := (Node{Tag: "response", Content: []Node{relay, media}}).String()
+	for _, secret := range []string{"relay-secret", "relay-key", "hop-secret", "ip-secret", "auth-secret"} {
+		if strings.Contains(logged, secret) {
+			t.Fatalf("credential leaked: %s", logged)
+		}
+	}
+	if !strings.Contains(logged, "example.invalid") {
+		t.Fatal("non-secret host was removed")
+	}
+	if string(relay.GetChildren()[0].Content.([]byte)) != "relay-secret" || media.Attrs["ip_token"] != "ip-secret" {
+		t.Fatal("logging modified the wire payload")
+	}
+}

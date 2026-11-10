@@ -36,3 +36,39 @@ Initial comparison (2026-11-10): Polymorfa f432198 vs tulir c88388f has 37 tulir
 and 293 fork-only commits; merge-tree reports conflicts in 15 files. This is not
 an already synchronized base. Resolve and validate those conflicts before claiming
 that the fork includes the current tulir main.
+
+
+## Integration candidate 2026-11-10
+
+Source: tulir/whatsmeow c88388f983b4bc43dfd0bcc2b46969fcde82d61f.
+The 37 upstream commits were merged into the public HyperMeow base. Resolution:
+
+- Keep bounded caches, shadow/remote signal support, synchronous name updates and
+  deferred app-state error dispatch; add upstream backoff and unified sessions.
+- Keep HTTP rejection precedence when racing sockets, add handshake/closed socket
+  retry classifications. Keep HyperMeow's lock-protected SetOnDisconnect API:
+  it already serializes setter/close access and avoids breaking existing callers.
+  Direct writes to OnDisconnect while in use remain unsupported.
+- Retain context-aware frame completion and the fork's boolean return contract.
+- Combine both XML credential-redaction sets without mutating protocol payloads.
+- Preserve ResolveLID cache/USync behavior, wrapping missing-LID failures with the
+  upstream ErrRecipientNotOnWhatsApp sentinel without a second network lookup.
+- Keep fork module/import namespace, libsignal fork and schema version 19.
+  Include upstream group-admin metadata in the bounded cache.
+- Regenerate 13 changed protobuf definitions from merged schemas, including the
+  new Hatch schema in the inherited namespace. Generator: protoc 33.6 (Windows
+  archive SHA256 96a83b8ee942f1046f079c43657cc09fd41f37a4e349ddb0e8ba5064c48bb5ff),
+  protoc-gen-go v1.36.12. MEX generation remains unchanged.
+
+Local Go 1.26.10 test, vet, build, MEX check and JS/WASM build passed. New regression
+coverage checks backoff before store access, release of its lock, handshake retry
+classification, HTTP rejection precedence and combined credential redaction.
+CI, race and dependent server validation are recorded in the integration PR.
+
+
+Dependent server validation exposed overlapping schema version 16: tulir has
+wasa_root_secret_id while HyperMeow uses that version for a sender-key index.
+The v18->v19 upgrade now checks column presence and ensures the missing index
+without overwriting root secrets. The server regression uses the exact previous
+v16 schema and verifies credential/root-secret preservation and repeat upgrade.
+Do not downgrade a live database in place; rollback restores a tested backup.

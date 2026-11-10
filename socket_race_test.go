@@ -44,6 +44,9 @@ func TestConnectRetryClassificationPreservesHTTPStatusPrecedence(t *testing.T) {
 		want bool
 	}{
 		{"single rejection", forbidden, false},
+		{"handshake timeout", ErrHandshakeTimeout, true},
+		{"socket closed before handshake", socket.ErrSocketClosed, true},
+		{"rejection before handshake timeout", errors.Join(forbidden, ErrHandshakeTimeout), false},
 		{"single server error", unavailable, true},
 		{"single network error", network, true},
 		{"rejection before network", errors.Join(forbidden, network), false},
