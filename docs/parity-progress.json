@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "baselineCount": 303,
-  "serverRevision": "93304d79bd09af36386035170e78886e6b151e56",
+  "serverRevision": "72c35ee4d7ce15ceb0d822b6d25a2ce8a9119cb2",
   "entries": [
     {
       "refs": [
@@ -235,6 +235,71 @@
       "evidence": "automated-contract",
       "liveEquivalence": false,
       "limit": "experimental JPEG/PNG with quick replies; device test deferred"
+    },
+    {
+      "refs": [
+        "Z270"
+      ],
+      "journeys": [
+        "J11"
+      ],
+      "method": "post",
+      "operation": "create-own-collection",
+      "success": 201,
+      "required": [
+        "name",
+        "productIds"
+      ],
+      "idempotency": true,
+      "fixture": "TestOwnCatalogMutationContracts",
+      "evidence": "automated-contract",
+      "liveEquivalence": false,
+      "limit": "Own connected seller only. SDK fixture and persistent HTTP replay. Merchant review and buyer-visible state require Business acceptance.",
+      "requireKey": true,
+      "resultOperation": "catalog-write-result"
+    },
+    {
+      "refs": [
+        "Z274"
+      ],
+      "journeys": [
+        "J11"
+      ],
+      "method": "post",
+      "operation": "update-own-collection",
+      "success": 200,
+      "required": [
+        "collectionId"
+      ],
+      "idempotency": true,
+      "fixture": "TestOwnCatalogMutationContracts",
+      "evidence": "automated-contract",
+      "liveEquivalence": false,
+      "limit": "Own connected seller only. SDK fixture and persistent HTTP replay. Merchant review and buyer-visible state require Business acceptance.",
+      "requireKey": true,
+      "resultOperation": "catalog-write-result"
+    },
+    {
+      "refs": [
+        "Z287"
+      ],
+      "journeys": [
+        "J11"
+      ],
+      "method": "post",
+      "operation": "set-own-product-visibility",
+      "success": 200,
+      "required": [
+        "productId",
+        "hidden"
+      ],
+      "idempotency": true,
+      "fixture": "TestOwnCatalogMutationContracts",
+      "evidence": "automated-contract",
+      "liveEquivalence": false,
+      "limit": "Own connected seller only. SDK fixture and persistent HTTP replay. Merchant review and buyer-visible state require Business acceptance.",
+      "requireKey": true,
+      "resultOperation": "catalog-write-result"
     }
   ]
 }
