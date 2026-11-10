@@ -43,6 +43,9 @@ func (cli *Client) NewsletterMarkViewed(ctx context.Context, jid types.JID, serv
 	if cli == nil {
 		return ErrClientIsNil
 	}
+	if err := ctx.Err(); err != nil {
+		return err
+	}
 	items := make([]waBinary.Node, len(serverIDs))
 	for i, id := range serverIDs {
 		items[i] = waBinary.Node{
@@ -54,6 +57,7 @@ func (cli *Client) NewsletterMarkViewed(ctx context.Context, jid types.JID, serv
 	}
 	reqID := cli.generateRequestID()
 	resp := cli.waitResponse(reqID)
+	defer cli.cancelResponse(reqID, resp)
 	err := cli.sendNode(ctx, waBinary.Node{
 		Tag: "receipt",
 		Attrs: waBinary.Attrs{
@@ -67,12 +71,27 @@ func (cli *Client) NewsletterMarkViewed(ctx context.Context, jid types.JID, serv
 		}},
 	})
 	if err != nil {
-		cli.cancelResponse(reqID, resp)
 		return err
 	}
-	// TODO handle response?
-	<-resp
-	return nil
+	timer := time.NewTimer(defaultRequestTimeout)
+	defer timer.Stop()
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-timer.C:
+		return ErrMessageTimedOut
+	case node := <-resp:
+		if node == nil {
+			return ErrNotConnected
+		}
+		if isDisconnectNode(node) {
+			return &DisconnectedError{Action: "newsletter view receipt", Node: node}
+		}
+		if code := node.AttrGetter().OptionalInt("error"); code != 0 {
+			return fmt.Errorf("%w %d", ErrServerReturnedError, code)
+		}
+		return nil
+	}
 }
 
 // NewsletterSendReaction sends a reaction to a channel message.

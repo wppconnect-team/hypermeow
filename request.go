@@ -63,8 +63,12 @@ func (cli *Client) waitResponse(reqID string) chan *waBinary.Node {
 
 func (cli *Client) cancelResponse(reqID string, ch chan *waBinary.Node) {
 	cli.responseWaitersLock.Lock()
-	close(ch)
-	delete(cli.responseWaiters, reqID)
+	// receiveResponse takes ownership by removing the waiter before sending.
+	// Never close a channel already handed to that receiver, or cancel twice.
+	if current, ok := cli.responseWaiters[reqID]; ok && current == ch {
+		delete(cli.responseWaiters, reqID)
+		close(ch)
+	}
 	cli.responseWaitersLock.Unlock()
 }
 
