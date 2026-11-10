@@ -5,6 +5,7 @@ on:
       - docs/parity-contract-matrix.compact.json
       - docs/parity-progress.json
       - docs/check-parity-progress.py
+      - docs/compare-server-contracts.py
       - .github/workflows/parity-progress.yml
   push:
     branches: [main]
@@ -12,6 +13,7 @@ on:
       - docs/parity-contract-matrix.compact.json
       - docs/parity-progress.json
       - docs/check-parity-progress.py
+      - docs/compare-server-contracts.py
       - .github/workflows/parity-progress.yml
 permissions:
   contents: read
@@ -30,7 +32,11 @@ jobs:
           from pathlib import Path
           sha = json.loads(Path("docs/parity-progress.json").read_text())["serverRevision"]
           if not re.fullmatch(r"[a-f0-9]{40}", sha): raise ValueError("invalid source SHA")
-          with open(os.environ["GITHUB_OUTPUT"], "a") as out: print("sha="+sha,file=out)
+          node = json.loads(Path("docs/parity-contract-matrix.compact.json").read_text())["baseline"]["node"]["sha"]
+          if not re.fullmatch(r"[a-f0-9]{40}", node): raise ValueError("invalid Node SHA")
+          with open(os.environ["GITHUB_OUTPUT"], "a") as out:
+              print("sha="+sha,file=out)
+              print("node="+node,file=out)
           PY
       - uses: actions/checkout@v7
         with:
@@ -39,3 +45,10 @@ jobs:
           path: verified-server
           persist-credentials: false
       - run: python3 docs/check-parity-progress.py verified-server
+      - uses: actions/checkout@v7
+        with:
+          repository: wppconnect-team/wppconnect-server
+          ref: ${{ steps.source.outputs.node }}
+          path: verified-node
+          persist-credentials: false
+      - run: python3 docs/compare-server-contracts.py verified-server verified-node
