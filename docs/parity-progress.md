@@ -10,6 +10,7 @@ A [matriz de 303 operações](parity-contract-matrix.md) é o inventário da ver
 | Z023 | Registrar visualização e esperar ACK | Fixture do SDK cobre ACK, rejeição, desconexão e cancelamento; repetição com chave não duplica o efeito no teste. |
 | Z025 | Consultar contadores e atualizações com `since` e `after` | Janela limitada, sem filtro `before` e sem garantia de histórico completo. |
 | Z026 | Aceitar aviso específico com consentimento explícito | Testado com cliente simulado. Nenhum termo foi aceito por conta real. |
+| Z290 | Excluir canal após verificar plataforma, ID e papel de dono. Uma confirmação válida identifica o mesmo canal com estado `DELETED`. | Cliente simulado e recibo SQLite. Exclusão real adiada por escolha do operador. |
 | Z027 | Enviar convite como administrador ou dono verificado | Verificação de papel e mensagem de protocolo testadas. Entrega, aceite e promoção não foram validados em duas contas. |
 
 O [recibo de canary, pool e navegador](channels-acceptance-2026-11-10.json) não contém telefones, credenciais nem identificadores das sessões. O [plano](../PLAN.md) separa CI, publicação e aceite real. Os testes que exigem segunda conta ou Android/iPhone/Web foram adiados pelo usuário.
@@ -21,6 +22,7 @@ O [recibo de canary, pool e navegador](channels-acceptance-2026-11-10.json) não
 | J11: Z249, Z250, Z251 e Z269 | [Catálogo da conta conectada](https://github.com/wppconnect-team/wppconnect-server-go/blob/main/docs/catalogo.pt-BR.md), sem substituir vendedor, preservando moeda, preço e visibilidade falsa. | Catálogo de outra empresa, pedidos, pagamentos e validação com vendedor real. |
 | J11: Z266 | Configurar o carrinho do vendedor com `set-cart-enabled`. O SDK valida o booleano devolvido pelo WhatsApp. Os testes HTTP exercitam habilitar, desabilitar e recuperar o resultado após falha. | Alteração do carrinho em uma conta Business e confirmação da experiência do comprador. |
 | J11: Z270, Z274 e Z287 | Criar e editar coleções e alterar a visibilidade de produtos. Escopo de escrita e consulta de resultado próprios, repetição idempotente, conflito e resposta remota incerta testados. | Moderação e visibilidade para o comprador em conta Business real. |
+| J11: Z271, Z282, Z283 e Z285 | Excluir coleções, criar, editar e excluir produtos no catálogo da sessão. A suíte cobre preço e moeda, resposta de revisão, contagem parcial e repetição após falha. | Confirmação individual de coleções, revisão comercial e visibilidade para o comprador aguardam conta Business. |
 | J15: Redis Streams e SQS | [Dois destinos opcionais](https://github.com/wppconnect-team/wppconnect-server-go/blob/main/docs/event-delivery-operations.md) com identidade do evento, recuperação e inspeção. Integração com Redis real e com ElasticMQ para SQS. | Recursos IAM/KMS na AWS, configuração CRUD por sessão e aceite operacional do consumidor. |
 | J05: Z126 | Carrossel experimental de imagens e respostas rápidas, montado pelo SDK. Testes de JSON, upload, protobuf, autorização e replay. | Vídeo, outros controles, entrega e apresentação em Android/iPhone/Web. |
 

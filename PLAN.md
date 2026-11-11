@@ -293,9 +293,15 @@ Os criterios de fechamento por entrega estao em [parity-remaining.md](docs/parit
 ## Cinco diferenciais do Node com aceite isolado
 
 - [x] Z290 - Remover canal com confirmação de identidade, papel de dono e proteção contra repetição.
-- [ ] Z271 - Excluir coleções com confirmação agregada e limite de lote.
-- [ ] Z282 - Criar produto preservando preço, moeda, mídia e resposta de revisão.
-- [ ] Z285 - Editar produto e conferir o ID devolvido.
-- [ ] Z283 - Excluir produtos e representar a contagem parcial.
-- [ ] Conferir escopos da Cloud, contratos OpenAPI e resultados persistidos nas suítes isoladas.
+- [x] Z271 - Excluir coleções com confirmação agregada e limite de lote.
+- [x] Z282 - Criar produto preservando preço, moeda, mídia e resposta de revisão.
+- [x] Z285 - Editar produto e conferir o ID devolvido.
+- [x] Z283 - Excluir produtos e representar a contagem parcial.
+- [x] Conferir escopos da Cloud, contratos OpenAPI e resultados persistidos nas suítes isoladas.
 - [ ] Aceite externo adiado. A exclusão de canal foi limitada a testes isolados pelo operador. O catálogo exige conta Business e a comparação HTTP exige Zuck licenciada.
+
+O verificador executou sete funções de teste HTTP para 22 contratos nativos mapeados sobre 303 operações de referência. Os dez diferenciais inicialmente apontados na comparação Node/Go têm testes de contrato. O CI do SDK executou as suítes de Go em duas versões. Na Cloud, os 52 testes locais passaram, assim como TypeScript, build e a leitura da documentação no navegador nas larguras 320, 375, 768 e 1440. A verificação desta fase usou exclusivamente recursos isolados. [SDK #16](https://github.com/wppconnect-team/hypermeow/pull/16), [servidor #39](https://github.com/wppconnect-team/wppconnect-server-go/pull/39), [Cloud #47](https://github.com/joaosouz4dev/wppconnect-cloud/pull/47) e [comparação dos cinco contratos](docs/parity-remaining.md#cinco-contratos-em-relação-ao-swagger-da-referência).
+
+- [x] Encerrar e reiniciar um processo Go descartável com os mesmos arquivos SQLite. Os cinco comandos da sessão desconectada recuperaram os recibos originais após o reinício, e todos recusaram uma mudança de corpo com a chave anterior. [Teste reproduzível](docs/check-isolated-mutation-replay.py).
+
+- [x] Incorporar as mudanças na principal do HyperMeow (`ba182bad1b6a`), do servidor Go (`1293a52d5bfd`) e da Cloud (`58a5af83a4c7`). Passaram a detecção de corridas em Go, os testes das imagens AMD64/ARM64 e a validação da Cloud. O ensaio não usou a sessão pareada nem promoveu uma imagem para a pool. [CI do servidor](https://github.com/wppconnect-team/wppconnect-server-go/actions/runs/42957781408) e [CI da Cloud](https://github.com/joaosouz4dev/wppconnect-cloud/actions/runs/42957749748).
