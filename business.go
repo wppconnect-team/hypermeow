@@ -2119,7 +2119,8 @@ func isBusinessGraphQLAuthError(err error) bool {
 	return false
 }
 
-func validateBusinessProductInput(input types.BusinessProductInput) error {
+// ValidateBusinessProductInput checks a catalog product before attempting a remote mutation.
+func ValidateBusinessProductInput(input types.BusinessProductInput) error {
 	input.Name = strings.TrimSpace(input.Name)
 	if input.Name == "" {
 		return fmt.Errorf("business product name is empty")
@@ -2151,7 +2152,7 @@ func validateBusinessProductInput(input types.BusinessProductInput) error {
 	}
 	if input.URL != "" {
 		parsed, err := url.ParseRequestURI(input.URL)
-		if err != nil || parsed.Scheme != "https" || parsed.Host == "" || len(input.URL) > 2048 {
+		if err != nil || parsed.Scheme != "https" || parsed.Host == "" || parsed.User != nil || len(input.URL) > 2048 {
 			return fmt.Errorf("business product URL must be an absolute HTTPS URL of at most 2048 bytes")
 		}
 	}
@@ -2215,8 +2216,8 @@ func validateBusinessMediaURL(rawURL string) error {
 		return fmt.Errorf("URL exceeds 4096 bytes")
 	}
 	parsed, err := url.ParseRequestURI(rawURL)
-	if err != nil || parsed.Scheme != "https" || parsed.Hostname() == "" {
-		return fmt.Errorf("URL must be absolute HTTPS")
+	if err != nil || parsed.Scheme != "https" || parsed.Hostname() == "" || parsed.User != nil {
+		return fmt.Errorf("URL must be absolute HTTPS without credentials")
 	}
 	host := strings.ToLower(parsed.Hostname())
 	if host != "whatsapp.net" && !strings.HasSuffix(host, ".whatsapp.net") && host != "fbcdn.net" && !strings.HasSuffix(host, ".fbcdn.net") && host != "facebook.com" && !strings.HasSuffix(host, ".facebook.com") {
@@ -2298,7 +2299,7 @@ func buildBusinessProductMutationVariables(jid types.JID, productID string, inpu
 			return nil, err
 		}
 	}
-	if err := validateBusinessProductInput(input); err != nil {
+	if err := ValidateBusinessProductInput(input); err != nil {
 		return nil, err
 	}
 	width, height, err := normalizeDimensions(width, height)
@@ -2701,6 +2702,9 @@ func (cli *Client) CreateBusinessProduct(ctx context.Context, input types.Busine
 }
 
 func (cli *Client) UpdateBusinessProduct(ctx context.Context, productID string, input types.BusinessProductInput, width, height int) (*types.BusinessProduct, error) {
+	if err := validateBusinessID("product", productID); err != nil {
+		return nil, err
+	}
 	jid, err := cli.ownBusinessJID()
 	if err != nil {
 		return nil, err
@@ -2713,7 +2717,14 @@ func (cli *Client) UpdateBusinessProduct(ctx context.Context, productID string, 
 	if err != nil {
 		return nil, fmt.Errorf("update business product: %w", err)
 	}
-	return decodeBusinessProductMutation(data, "xfb_whatsapp_catalog_edit_product")
+	product, err := decodeBusinessProductMutation(data, "xfb_whatsapp_catalog_edit_product")
+	if err != nil {
+		return nil, err
+	}
+	if product.ID != productID {
+		return nil, fmt.Errorf("edited product response ID did not match the request")
+	}
+	return product, nil
 }
 
 func (cli *Client) DeleteBusinessProducts(ctx context.Context, productIDs []string) (int, error) {

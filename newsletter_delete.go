@@ -10,6 +10,8 @@ import (
 	"fmt"
 
 	"github.com/polymorfa/hypermeow/mex"
+	"github.com/polymorfa/hypermeow/proto/waWa6"
+	"github.com/polymorfa/hypermeow/store"
 	"github.com/polymorfa/hypermeow/types"
 )
 
@@ -59,6 +61,23 @@ func decodeDeleteNewsletterResponse(data json.RawMessage, requested types.JID) e
 	return nil
 }
 
+// SupportsNewsletterDeletion reports whether this session can issue the Web deletion query.
+func (cli *Client) SupportsNewsletterDeletion() bool {
+	if cli == nil || cli.Store == nil || cli.Store.ID == nil || cli.Store.ID.IsEmpty() || store.BaseClientPayload.GetUserAgent().GetPlatform() == waWa6.ClientPayload_UserAgent_MACOS {
+		return false
+	}
+	// The MEX transport also checks the device store when selecting its query.
+	if convertQueryID(cli, mutationDeleteNewsletter) == "" {
+		return false
+	}
+	getPayload := cli.GetClientPayload
+	if getPayload == nil {
+		getPayload = cli.Store.GetClientPayload
+	}
+	payload := getPayload()
+	return payload.GetUserAgent().GetPlatform() == waWa6.ClientPayload_UserAgent_WEB && payload.GetWebInfo() != nil
+}
+
 // DeleteNewsletter permanently deletes a WhatsApp channel owned by the client.
 func (cli *Client) DeleteNewsletter(ctx context.Context, jid types.JID) error {
 	if cli == nil {
@@ -67,6 +86,9 @@ func (cli *Client) DeleteNewsletter(ctx context.Context, jid types.JID) error {
 	variables, err := buildDeleteNewsletterVariables(jid)
 	if err != nil {
 		return err
+	}
+	if !cli.SupportsNewsletterDeletion() {
+		return fmt.Errorf("newsletter deletion requires a supported Web client payload")
 	}
 	binding, ok := mex.Lookup(mex.DeleteNewsletter)
 	if !ok {
