@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "baselineCount": 303,
-  "serverRevision": "72c35ee4d7ce15ceb0d822b6d25a2ce8a9119cb2",
+  "serverRevision": "bffcd90760a33f71e081e372044c7b41827b31e7",
   "entries": [
     {
       "refs": [
@@ -298,6 +298,27 @@
       "evidence": "automated-contract",
       "liveEquivalence": false,
       "limit": "Own connected seller only. SDK fixture and persistent HTTP replay. Merchant review and buyer-visible state require Business acceptance.",
+      "requireKey": true,
+      "resultOperation": "catalog-write-result"
+    },
+    {
+      "refs": [
+        "Z266"
+      ],
+      "journeys": [
+        "J11"
+      ],
+      "method": "post",
+      "operation": "set-cart-enabled",
+      "success": 201,
+      "required": [
+        "enabled"
+      ],
+      "idempotency": true,
+      "fixture": "TestOwnCatalogMutationContracts",
+      "evidence": "automated-contract",
+      "liveEquivalence": false,
+      "limit": "Both boolean values, seller scope, replay and unconfirmed results are tested. Merchant cart state has not been verified on a Business account.",
       "requireKey": true,
       "resultOperation": "catalog-write-result"
     }

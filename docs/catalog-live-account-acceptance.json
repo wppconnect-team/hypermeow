@@ -53,5 +53,10 @@
     },
     "healthyGoReserves": 3,
     "reserveRevision": "72c35ee4d7ce15ceb0d822b6d25a2ce8a9119cb2"
+  },
+  "operatorConfirmation": {
+    "pairedAccountType": "personal",
+    "hasCatalog": false,
+    "source": "operator confirmation after the read-only probe"
   }
 }
