@@ -3,8 +3,9 @@ package socket
 import (
 	"bytes"
 	"context"
-	waLog "github.com/polymorfa/hypermeow/util/log"
 	"testing"
+
+	waLog "github.com/polymorfa/hypermeow/util/log"
 )
 
 func TestFrameStreamBoundaries(t *testing.T) {
