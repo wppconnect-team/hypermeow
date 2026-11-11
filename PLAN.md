@@ -265,3 +265,10 @@ Os criterios de fechamento por entrega estao em [parity-remaining.md](docs/parit
 - [ ] Comparação comportamental das APIs lado a lado. Requer uma instalação de homologação da referência já licenciada ou uma licença válida para a instância de teste. A ausência da chave não interfere na execução dos testes nativos do Go, da Cloud, do Chatwoot, do Redis e do MinIO.
 
 - [x] Pool final em `72c35ee4d7ce`, três reservas Go saudáveis em 2026-11-10T23:17:07.675798+00:00. O primeiro canary terminou com erro antes da promoção. A repetição isolada passou com a mesma imagem. O binário leu uma linha de histórico de versão antiga, preservou o texto e omitiu o marcador exclusivo de mensagens ao vivo. A sessão pareada permaneceu conectada. [Recibo da publicação](docs/catalog-write-acceptance.json).
+
+## Consulta real ao catálogo da sessão pareada
+
+- [x] Consultar catálogo e coleções na sessão autorizada. As duas leituras retornaram HTTP 502. O SDK identificou GraphQL 400 nas duas chamadas e não obteve um perfil comercial identificável para a conta. O total de produtos permanece desconhecido. [Evidência de leitura](docs/catalog-live-account-acceptance.json).
+- [x] A correção do [servidor Go #36](https://github.com/wppconnect-team/wppconnect-server-go/pull/36) passou no CI e foi verificada pelo Manager na sessão pareada. Com a revisão `f739440a12d7`, as duas consultas retornaram `WhatsApp catalog query failed (GraphQL 400)`. A sessão permaneceu conectada e as três reservas Go continuaram saudáveis na revisão `72c35ee4d7ce`. [CI](https://github.com/wppconnect-team/wppconnect-server-go/actions/runs/42936768438).
+- [ ] Confirmar leitura direta de um produto descartável e validar criação e edição de coleção e mudança de visibilidade na mesma conta. Nenhuma escrita foi enviada.
+- [ ] Comparar respostas HTTP com a Zuck v2.4.2. O operador confirmou que não há instância licenciada nem chave de teste disponível.
