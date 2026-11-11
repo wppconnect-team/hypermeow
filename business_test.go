@@ -1300,6 +1300,7 @@ func TestBuildBusinessProductMutationVariablesRejectsUnsafeInput(t *testing.T) {
 		{},
 		{Name: "Tea"},
 		{Name: "Tea", ImageURLs: []string{"http://mmg.whatsapp.net/product/tea"}},
+		{Name: "Tea", ImageURLs: []string{"https://user:password@mmg.whatsapp.net/product/tea"}},
 		{Name: "Tea", ImageURLs: []string{"https://example.test/product/tea"}},
 		{Name: "Tea", ImageURLs: []string{"https://mmg.whatsapp.net/product/tea"}, Currency: "US", Price: "1250"},
 		{Name: "Tea", ImageURLs: []string{"https://mmg.whatsapp.net/product/tea"}, Currency: "123", Price: "1250"},

@@ -289,3 +289,13 @@ Os criterios de fechamento por entrega estao em [parity-remaining.md](docs/parit
 - [x] Ativar os dois endpoints no server-go para sessões novas e restauradas, preservando o cliente HTTP da sessão. Vinte repetições locais verificaram que uma recusa do upgrade de qualquer endpoint permite receber um frame no outro. [Servidor Go #38](https://github.com/wppconnect-team/wppconnect-server-go/pull/38) e [CI do servidor](https://github.com/wppconnect-team/wppconnect-server-go/actions/runs/42948935834).
 - [x] Z136 na conta pessoal autorizada. Uma mensagem de teste foi favoritada, a sessão persistiu o evento observado, reconectou sem QR depois de reiniciar e confirmou a desfavoritação. O estado inicial foi restaurado. O verificador da matriz executou cinco funções de teste para 17 contratos nativos. [Recibo do aceite](docs/socket-star-acceptance.json).
 - [x] Publicar o servidor na pool, conferir as três reservas Go saudáveis e remover as alocações descartáveis. A Cloud publicou os escopos de leitura e escrita de favoritos. Os 52 testes da Cloud passaram, o guia abriu em português e inglês, e as três operações recusaram a chamada pública sem credencial. [Cloud #46](https://github.com/joaosouz4dev/wppconnect-cloud/pull/46) e [resultado do teste](docs/socket-star-acceptance.json).
+
+## Cinco diferenciais do Node com aceite isolado
+
+- [x] Z290 - Remover canal com confirmação de identidade, papel de dono e proteção contra repetição.
+- [ ] Z271 - Excluir coleções com confirmação agregada e limite de lote.
+- [ ] Z282 - Criar produto preservando preço, moeda, mídia e resposta de revisão.
+- [ ] Z285 - Editar produto e conferir o ID devolvido.
+- [ ] Z283 - Excluir produtos e representar a contagem parcial.
+- [ ] Conferir escopos da Cloud, contratos OpenAPI e resultados persistidos nas suítes isoladas.
+- [ ] Aceite externo adiado. A exclusão de canal foi limitada a testes isolados pelo operador. O catálogo exige conta Business e a comparação HTTP exige Zuck licenciada.

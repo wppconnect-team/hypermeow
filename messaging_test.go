@@ -179,6 +179,26 @@ func TestDeleteNewsletterQueryIsRejectedForDesktopPayloads(t *testing.T) {
 	}
 }
 
+func TestNewsletterDeletionCapability(t *testing.T) {
+	id := types.NewJID("123", types.DefaultUserServer)
+	cli := &Client{Store: &store.Device{ID: &id}}
+	if !cli.SupportsNewsletterDeletion() {
+		t.Fatal("default Web client should support deletion")
+	}
+	for _, platform := range []waWa6.ClientPayload_UserAgent_Platform{waWa6.ClientPayload_UserAgent_MACOS, waWa6.ClientPayload_UserAgent_ANDROID} {
+		cli.GetClientPayload = func() *waWa6.ClientPayload {
+			return &waWa6.ClientPayload{UserAgent: &waWa6.ClientPayload_UserAgent{Platform: platform.Enum()}, WebInfo: &waWa6.ClientPayload_WebInfo{}}
+		}
+		if cli.SupportsNewsletterDeletion() {
+			t.Fatal("non-Web client allowed", platform)
+		}
+	}
+	cli.GetClientPayload = func() *waWa6.ClientPayload { return nil }
+	if cli.SupportsNewsletterDeletion() || (&Client{}).SupportsNewsletterDeletion() {
+		t.Fatal("absent payload/store allowed")
+	}
+}
+
 func TestMarkReadRejectsMultipleReceiptTypes(t *testing.T) {
 	client := &Client{}
 	err := client.MarkRead(

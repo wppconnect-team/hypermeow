@@ -153,7 +153,7 @@ const (
 )
 
 func convertQueryID(cli *Client, queryID string) string {
-	if payload := cli.Store.GetClientPayload(); payload.GetUserAgent().Platform == waWa6.ClientPayload_UserAgent_MACOS.Enum() || payload.GetWebInfo() == nil {
+	if payload := cli.Store.GetClientPayload(); payload.GetUserAgent().GetPlatform() == waWa6.ClientPayload_UserAgent_MACOS || payload.GetWebInfo() == nil {
 		switch queryID {
 		case queryFetchNewsletter:
 			return queryFetchNewsletterDesktop
@@ -201,6 +201,7 @@ func (cli *Client) sendMexIQ(ctx context.Context, queryID string, variables any)
 	}
 	resp, err := cli.sendIQ(ctx, infoQuery{
 		Namespace: "w:mex",
+		NoRetry:   queryID == mutationDeleteNewsletter,
 		Type:      iqGet,
 		To:        types.ServerJID,
 		Content: []waBinary.Node{{
