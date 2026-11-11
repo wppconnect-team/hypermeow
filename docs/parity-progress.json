@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "baselineCount": 303,
-  "serverRevision": "bffcd90760a33f71e081e372044c7b41827b31e7",
+  "serverRevision": "a7c46b0c3a1c127f6f3b9f969ff2a3b3bdcb520d",
   "entries": [
     {
       "refs": [
@@ -321,6 +321,29 @@
       "limit": "Both boolean values, seller scope, replay and unconfirmed results are tested. Merchant cart state has not been verified on a Business account.",
       "requireKey": true,
       "resultOperation": "catalog-write-result"
+    },
+    {
+      "refs": [
+        "Z136"
+      ],
+      "journeys": [
+        "J06"
+      ],
+      "method": "post",
+      "operation": "star-message",
+      "success": 200,
+      "required": [
+        "chatId",
+        "messageId",
+        "star"
+      ],
+      "idempotency": true,
+      "fixture": "TestStarMessageContracts",
+      "evidence": "automated-contract",
+      "liveEquivalence": false,
+      "limit": "Direct or group messages retained by the owning session. The command receipt and observed star state are separate, with no assertion of identical reference behavior.",
+      "requireKey": true,
+      "resultOperation": "message-state-result"
     }
   ]
 }

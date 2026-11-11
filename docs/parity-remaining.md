@@ -27,15 +27,14 @@ A imagem AMD64 da matriz foi iniciada duas vezes em uma rede Docker interna com 
 
 ## Comparação atualizada do servidor Node com o Go
 
-Em 10/11/2026, a principal do Node ainda apontava para `37b7bc1a662b`. Seu Swagger descreve 158 operações. O OpenAPI do Go em `bffcd90760a3` descreve 162 operações em 157 caminhos. A interseção por **método e caminho literais** tem 82 operações. Restam 80 combinações exclusivas do Go e 76 exclusivas do Node. Essa contagem inclui capacidades experimentais ou indisponíveis quando presentes no contrato. [Swagger do Node](https://github.com/wppconnect-team/wppconnect-server/blob/37b7bc1a662b5262b8276597701f38c4dbcad58a/src/swagger.json) e [OpenAPI do Go](https://github.com/wppconnect-team/wppconnect-server-go/blob/bffcd90760a33f71e081e372044c7b41827b31e7/docs/openapi.json).
+O Swagger da revisão de referência do Node, `37b7bc1a662b`, descreve 158 operações. O OpenAPI do Go em `a7c46b0c3a1c` descreve 165 operações em 160 caminhos. A interseção por **método e caminho literais** tem 83 operações. Restam 82 combinações exclusivas do Go e 75 exclusivas do Node. Essa contagem inclui capacidades experimentais ou indisponíveis quando presentes no contrato. [Swagger do Node](https://github.com/wppconnect-team/wppconnect-server/blob/37b7bc1a662b5262b8276597701f38c4dbcad58a/src/swagger.json) e [OpenAPI do Go](https://github.com/wppconnect-team/wppconnect-server-go/blob/a7c46b0c3a1c127f6f3b9f969ff2a3b3bdcb520d/docs/openapi.json).
 
 Para reproduzir a contagem com os dois repositórios locais, execute `python docs/compare-server-contracts.py CAMINHO_GO CAMINHO_NODE`. O script lê os blobs Git fixados pelo plano, lista as contagens por jornada e identifica os candidatos abaixo.
 
-Na matriz congelada, dez operações Zuck combinavam um núcleo adaptável no Node com ausência de equivalente exposto no Go. Quatro agora têm um contrato Go nativo testado, Z266, Z270, Z274 e Z287. As seis restantes abaixo merecem verificação própria. A referência a um método de SDK indica por onde começar a implementação.
+Na matriz congelada, dez operações Zuck combinavam um núcleo adaptável no Node com ausência de equivalente exposto no Go. Cinco agora têm um contrato Go nativo testado, Z136, Z266, Z270, Z274 e Z287. As cinco restantes abaixo merecem verificação própria. A referência a um método de SDK indica por onde começar a implementação.
 
 | Prioridade e IDs | Trabalho | Critério de aceite |
 | --- | --- | --- |
-| P1, Z136 | Favoritar ou desfavoritar uma mensagem observada. O Node usa `starMessage` e o HyperMeow dispõe de `appstate.BuildStar`. | Aceitar `false` explicitamente. Vincular a mensagem ao chat, remetente e sessão corretos, persistir o estado observado e confirmar a sincronização após reinício. |
 | P2, Z290 | Remover um canal que pertence à conta. O SDK contém `DeleteNewsletter`. O teste do SDK rejeita a consulta MEX para payload de Desktop. | Verificar a capacidade do cliente antes de expor o comando. Conferir o papel de dono e o identificador remoto, impedir repetição após confirmação incerta e validar o efeito apenas em um canal descartável. |
 | P3, Z271 | Excluir coleções do vendedor com `DeleteBusinessCollections`. | Documentar o efeito de vários IDs no mesmo pedido, tratar confirmação parcial e reconciliar antes de repetir. |
 | P3, Z282, Z283, Z285 | Criar, excluir ou editar produtos. | Preservar identificadores, moeda e precisão de preço. Validar mídia antes de enviar, tratar revisão e testar alterações somente com produtos descartáveis. |
