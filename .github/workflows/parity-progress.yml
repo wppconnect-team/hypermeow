@@ -5,6 +5,7 @@ on:
       - docs/parity-contract-matrix.compact.json
       - docs/parity-progress.json
       - docs/check-parity-progress.py
+      - docs/check-isolated-mutation-replay.py
       - docs/compare-server-contracts.py
       - .github/workflows/parity-progress.yml
   push:
@@ -13,6 +14,7 @@ on:
       - docs/parity-contract-matrix.compact.json
       - docs/parity-progress.json
       - docs/check-parity-progress.py
+      - docs/check-isolated-mutation-replay.py
       - docs/compare-server-contracts.py
       - .github/workflows/parity-progress.yml
 permissions:
@@ -49,6 +51,7 @@ jobs:
           go-version-file: verified-server/go.mod
           cache-dependency-path: verified-server/go.sum
       - run: python3 docs/check-parity-progress.py verified-server --run-fixtures
+      - run: python3 docs/check-isolated-mutation-replay.py verified-server
       - uses: actions/checkout@v7
         with:
           repository: wppconnect-team/wppconnect-server

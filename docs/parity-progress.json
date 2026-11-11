@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "baselineCount": 303,
-  "serverRevision": "a7c46b0c3a1c127f6f3b9f969ff2a3b3bdcb520d",
+  "serverRevision": "1293a52d5bfd772ae8d8e0d53116465e295bd2fd",
   "entries": [
     {
       "refs": [
@@ -344,6 +344,112 @@
       "limit": "Direct or group messages retained by the owning session. The command receipt and observed star state are separate, with no assertion of identical reference behavior.",
       "requireKey": true,
       "resultOperation": "message-state-result"
+    },
+    {
+      "refs": [
+        "Z290"
+      ],
+      "journeys": [
+        "J10"
+      ],
+      "method": "post",
+      "operation": "delete-newsletter",
+      "success": 200,
+      "required": [
+        "id"
+      ],
+      "idempotency": true,
+      "fixture": "TestOwnedNewsletterDeletion",
+      "evidence": "automated-contract",
+      "liveEquivalence": false,
+      "limit": "Only owner with supported Web payload. Matching DELETED identity, role refusal and uncertain replay tested in isolation. Real deletion deferred.",
+      "requireKey": true,
+      "resultOperation": "newsletter-admin-result"
+    },
+    {
+      "refs": [
+        "Z271"
+      ],
+      "journeys": [
+        "J11"
+      ],
+      "method": "post",
+      "operation": "del-collection",
+      "success": 200,
+      "required": [
+        "collectionIds"
+      ],
+      "idempotency": true,
+      "fixture": "TestOwnedCatalogProductContracts",
+      "evidence": "automated-contract",
+      "liveEquivalence": false,
+      "limit": "Aggregate acknowledgement with no per-ID receipt. Verify a real collection only with a Business catalog.",
+      "requireKey": true,
+      "resultOperation": "catalog-write-result"
+    },
+    {
+      "refs": [
+        "Z282"
+      ],
+      "journeys": [
+        "J11"
+      ],
+      "method": "post",
+      "operation": "add-product",
+      "success": 201,
+      "required": [
+        "product"
+      ],
+      "idempotency": true,
+      "fixture": "TestOwnedCatalogProductContracts",
+      "evidence": "automated-contract",
+      "liveEquivalence": false,
+      "limit": "Full input with hosted media references and string amounts. Synthetic review status only.",
+      "requireKey": true,
+      "resultOperation": "catalog-write-result"
+    },
+    {
+      "refs": [
+        "Z285"
+      ],
+      "journeys": [
+        "J11"
+      ],
+      "method": "post",
+      "operation": "edit-product",
+      "success": 200,
+      "required": [
+        "productId",
+        "product"
+      ],
+      "idempotency": true,
+      "fixture": "TestOwnedCatalogProductContracts",
+      "evidence": "automated-contract",
+      "liveEquivalence": false,
+      "limit": "Full input with explicit visibility and matching returned ID. Seller and buyer state require a Business account.",
+      "requireKey": true,
+      "resultOperation": "catalog-write-result"
+    },
+    {
+      "refs": [
+        "Z283"
+      ],
+      "journeys": [
+        "J11"
+      ],
+      "method": "post",
+      "operation": "del-products",
+      "success": 200,
+      "required": [
+        "productIds"
+      ],
+      "idempotency": true,
+      "fixture": "TestOwnedCatalogProductContracts",
+      "evidence": "automated-contract",
+      "liveEquivalence": false,
+      "limit": "Count-only confirmation. A smaller count returns partial, an impossible count remains unconfirmed. Live Business acceptance deferred.",
+      "requireKey": true,
+      "resultOperation": "catalog-write-result"
     }
   ]
 }
