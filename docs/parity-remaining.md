@@ -19,7 +19,7 @@ O ensaio de queda de processo e backlog foi incorporado em [server-go #28](https
 
 ## Catálogo da sessão pareada
 
-A sessão autorizada reconectou sem novo QR e recebeu HTTP 502 nas consultas ao catálogo próprio e às coleções. O SDK recebeu o código GraphQL 400 nas duas operações e não identificou um perfil Business para o vendedor. A quantidade de produtos permanece desconhecida. Para retomar o aceite com essa mesma conta, usar o link ou ID de um produto descartável visível no WhatsApp Business, confirmar a leitura direta e registrar o estado inicial antes de editar a coleção ou a visibilidade. [Registro da sessão de teste](catalog-live-account-acceptance.json).
+O operador confirmou que a sessão pareada usa WhatsApp comum e não tem catálogo. Nas duas consultas, o Manager devolveu HTTP 502 e o SDK informou GraphQL 400. Não houve escrita. A leitura direta de produto e o aceite de coleção, visibilidade e carrinho ficam pendentes para uma conta WhatsApp Business com catálogo de teste. A sessão pessoal continua disponível para os testes de mensagens. [Registro da sessão](catalog-live-account-acceptance.json).
 
 ## Execução da referência
 
@@ -27,17 +27,16 @@ A imagem AMD64 da matriz foi iniciada duas vezes em uma rede Docker interna com 
 
 ## Comparação atualizada do servidor Node com o Go
 
-Em 10/11/2026, a principal do Node ainda apontava para `37b7bc1a662b`. Seu Swagger descreve 158 operações. O OpenAPI do Go em `72c35ee4d7ce` descreve 161 operações em 156 caminhos. A interseção por **método e caminho literais** tem 81 operações. Restam 80 combinações exclusivas do Go e 77 exclusivas do Node. Essa contagem inclui capacidades experimentais ou indisponíveis quando presentes no contrato. [Swagger do Node](https://github.com/wppconnect-team/wppconnect-server/blob/37b7bc1a662b5262b8276597701f38c4dbcad58a/src/swagger.json) e [OpenAPI do Go](https://github.com/wppconnect-team/wppconnect-server-go/blob/72c35ee4d7ce15ceb0d822b6d25a2ce8a9119cb2/docs/openapi.json).
+Em 10/11/2026, a principal do Node ainda apontava para `37b7bc1a662b`. Seu Swagger descreve 158 operações. O OpenAPI do Go em `bffcd90760a3` descreve 162 operações em 157 caminhos. A interseção por **método e caminho literais** tem 82 operações. Restam 80 combinações exclusivas do Go e 76 exclusivas do Node. Essa contagem inclui capacidades experimentais ou indisponíveis quando presentes no contrato. [Swagger do Node](https://github.com/wppconnect-team/wppconnect-server/blob/37b7bc1a662b5262b8276597701f38c4dbcad58a/src/swagger.json) e [OpenAPI do Go](https://github.com/wppconnect-team/wppconnect-server-go/blob/bffcd90760a33f71e081e372044c7b41827b31e7/docs/openapi.json).
 
 Para reproduzir a contagem com os dois repositórios locais, execute `python docs/compare-server-contracts.py CAMINHO_GO CAMINHO_NODE`. O script lê os blobs Git fixados pelo plano, lista as contagens por jornada e identifica os candidatos abaixo.
 
-Na matriz congelada, dez operações Zuck combinavam um núcleo adaptável no Node com ausência de equivalente exposto no Go. Três agora têm um contrato Go nativo testado, Z270, Z274 e Z287. As sete restantes abaixo merecem verificação própria. A referência a um método de SDK indica por onde começar a implementação.
+Na matriz congelada, dez operações Zuck combinavam um núcleo adaptável no Node com ausência de equivalente exposto no Go. Quatro agora têm um contrato Go nativo testado, Z266, Z270, Z274 e Z287. As seis restantes abaixo merecem verificação própria. A referência a um método de SDK indica por onde começar a implementação.
 
 | Prioridade e IDs | Trabalho | Critério de aceite |
 | --- | --- | --- |
 | P1, Z136 | Favoritar ou desfavoritar uma mensagem observada. O Node usa `starMessage` e o HyperMeow dispõe de `appstate.BuildStar`. | Aceitar `false` explicitamente. Vincular a mensagem ao chat, remetente e sessão corretos, persistir o estado observado e confirmar a sincronização após reinício. |
 | P2, Z290 | Remover um canal que pertence à conta. O SDK contém `DeleteNewsletter`. O teste do SDK rejeita a consulta MEX para payload de Desktop. | Verificar a capacidade do cliente antes de expor o comando. Conferir o papel de dono e o identificador remoto, impedir repetição após confirmação incerta e validar o efeito apenas em um canal descartável. |
-| P3, Z266 | Habilitar ou desabilitar o carrinho do vendedor com `SetBusinessCartEnabled`. | Aplicar privilégio de escrita, preservar `false` e conferir o valor devolvido pelo provedor. |
 | P3, Z271 | Excluir coleções do vendedor com `DeleteBusinessCollections`. | Documentar o efeito de vários IDs no mesmo pedido, tratar confirmação parcial e reconciliar antes de repetir. |
 | P3, Z282, Z283, Z285 | Criar, excluir ou editar produtos. | Preservar identificadores, moeda e precisão de preço. Validar mídia antes de enviar, tratar revisão e testar alterações somente com produtos descartáveis. |
 
