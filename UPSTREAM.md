@@ -3,7 +3,7 @@
 - Primary protocol upstream: https://github.com/tulir/whatsmeow, resolve default branch via GitHub.
 - Public feature upstream: https://github.com/polymorfa/hypermeow, resolve its default branch separately.
 - Destination: https://github.com/wppconnect-team/hypermeow, main.
-- Daily schedule: 09:30 America/Sao_Paulo through the requested Codex task.
+- Daily schedule: 09:30 America/Sao_Paulo through the requested Codex task. Review the public Web transport, the active HyperMeow implementation and the version pinned by server-go. Record versioned evidence and run socket regression tests when a behavior changes. [Transport study and reproduction](docs/web-socket.md).
 
 Use a fresh clone or clean worktree. Fetch both upstreams and origin; record exact
 SHAs, merge base, ahead/behind and patch-equivalent commits. Preserve local work.

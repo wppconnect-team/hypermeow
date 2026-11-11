@@ -506,3 +506,55 @@ func TestConnectRaceCancelsEveryPendingDial(t *testing.T) {
 		t.Fatal("pending race did not return on cancellation")
 	}
 }
+
+func TestConnectRaceFallsBackAfterUpgradeRefusal(t *testing.T) {
+	for _, deniedFirst := range []bool{true, false} {
+		t.Run(fmt.Sprintf("deniedFirst=%t", deniedFirst), func(t *testing.T) {
+			denied := make(chan struct{})
+			bad := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				http.Error(w, "unavailable", http.StatusServiceUnavailable)
+				close(denied)
+			}))
+			defer bad.Close()
+			good := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				select {
+				case <-denied:
+				case <-r.Context().Done():
+					return
+				}
+				conn, err := websocket.Accept(w, r, &websocket.AcceptOptions{OriginPatterns: []string{"*"}})
+				if err != nil {
+					return
+				}
+				defer conn.CloseNow()
+				if err = conn.Write(r.Context(), websocket.MessageBinary, []byte{0, 0, 1, 42}); err == nil {
+					_, _, _ = conn.Read(r.Context())
+				}
+			}))
+			defer good.Close()
+			winner := "ws" + strings.TrimPrefix(good.URL, "http")
+			urls := []string{winner, "ws" + strings.TrimPrefix(bad.URL, "http")}
+			if deniedFirst {
+				slices.Reverse(urls)
+			}
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+			fs, err := ConnectRace(ctx, waLog.Noop, http.DefaultClient, urls, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer fs.Close(websocket.StatusNormalClosure)
+			if fs.URL != winner {
+				t.Fatal("refused upgrade selected")
+			}
+			select {
+			case frame := <-fs.Frames:
+				if len(frame) != 1 || frame[0] != 42 {
+					t.Fatalf("unexpected frame %v", frame)
+				}
+			case <-ctx.Done():
+				t.Fatal("no frame from surviving endpoint")
+			}
+		})
+	}
+}
