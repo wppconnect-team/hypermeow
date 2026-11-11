@@ -42,7 +42,8 @@ type FrameSocket struct {
 	incomingLength int
 	receivedLength int
 	incoming       []byte
-	partialHeader  []byte
+	partialHeader  [FrameLengthSize]byte
+	headerBytes    int
 }
 
 func NewFrameSocket(log waLog.Logger, client *http.Client) *FrameSocket {
@@ -194,7 +195,7 @@ func (fs *FrameSocket) SendFrame(data []byte) error {
 func (fs *FrameSocket) frameComplete() bool {
 	data := fs.incoming
 	fs.incoming = nil
-	fs.partialHeader = nil
+	fs.headerBytes = 0
 	fs.incomingLength = 0
 	fs.receivedLength = 0
 	select {
@@ -207,31 +208,32 @@ func (fs *FrameSocket) frameComplete() bool {
 
 func (fs *FrameSocket) processData(msg []byte) {
 	for len(msg) > 0 {
-		// This probably doesn't happen a lot (if at all), so the code is unoptimized
-		if fs.partialHeader != nil {
-			msg = append(fs.partialHeader, msg...)
-			fs.partialHeader = nil
-		}
 		if fs.incoming == nil {
-			if len(msg) >= FrameLengthSize {
-				length := (int(msg[0]) << 16) + (int(msg[1]) << 8) + int(msg[2])
-				fs.incomingLength = length
-				msg = msg[FrameLengthSize:]
-				fs.receivedLength = len(msg)
-				if len(msg) >= length {
-					fs.incoming = msg[:length]
-					msg = msg[length:]
-					if !fs.frameComplete() {
-						return
-					}
-				} else {
-					fs.incoming = make([]byte, length)
-					copy(fs.incoming, msg)
-					msg = nil
+			var header []byte
+			if fs.headerBytes == 0 && len(msg) >= FrameLengthSize {
+				header, msg = msg[:FrameLengthSize], msg[FrameLengthSize:]
+			} else {
+				n := copy(fs.partialHeader[fs.headerBytes:], msg)
+				fs.headerBytes += n
+				msg = msg[n:]
+				if fs.headerBytes < FrameLengthSize {
+					return
+				}
+				fs.headerBytes = 0
+				header = fs.partialHeader[:]
+			}
+			length := int(header[0])<<16 | int(header[1])<<8 | int(header[2])
+			fs.incomingLength = length
+			fs.receivedLength = len(msg)
+			if len(msg) >= length {
+				fs.incoming = msg[:length]
+				msg = msg[length:]
+				if !fs.frameComplete() {
+					return
 				}
 			} else {
-				fs.log.Warnf("Received partial header (report if this happens often)")
-				fs.partialHeader = msg
+				fs.incoming = make([]byte, length)
+				copy(fs.incoming, msg)
 				msg = nil
 			}
 		} else {
