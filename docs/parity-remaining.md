@@ -17,9 +17,13 @@ Para o Chatwoot, os contratos oficiais distinguem [contatos](https://developers.
 
 O ensaio de queda de processo e backlog foi incorporado em [server-go #28](https://github.com/wppconnect-team/wppconnect-server-go/pull/28). Ele mede recuperação da fila SQLite após queda do processo. No [ensaio complementar com Redis](https://github.com/wppconnect-team/wppconnect-server-go/pull/33), quatro workers processaram 32 eventos enquanto o stream rejeitava as gravações. Depois de reabrir o banco e restaurar o stream, o replay preservou IDs, sessões e entregas confirmadas no webhook. Queda de rede e metas de capacidade continuam em aberto. O adaptador publicado recebe respostas públicas de atendentes e vincula mensagens diretas a uma conversa. O [teste com a aplicação Chatwoot](https://github.com/wppconnect-team/wppconnect-server-go/actions/runs/42911977000) exercita a API de uma inbox em PostgreSQL e a assinatura de um callback do atendente. O lado WhatsApp continua simulado nesse teste. Para o sentido inverso, o comando de mensagem aceita JSON para texto e multipart para anexos na [API oficial do Chatwoot](https://developers.chatwoot.com/api-reference/messages/create-new-message); isso por si só não prova deduplicação.
 
+## Catálogo da sessão pareada
+
+A sessão autorizada reconectou sem novo QR e recebeu HTTP 502 nas consultas ao catálogo próprio e às coleções. O SDK recebeu o código GraphQL 400 nas duas operações e não identificou um perfil Business para o vendedor. A quantidade de produtos permanece desconhecida. Para retomar o aceite com essa mesma conta, usar o link ou ID de um produto descartável visível no WhatsApp Business, confirmar a leitura direta e registrar o estado inicial antes de editar a coleção ou a visibilidade. [Registro da sessão de teste](catalog-live-account-acceptance.json).
+
 ## Execução da referência
 
-A imagem AMD64 da matriz foi iniciada duas vezes em uma rede Docker interna com um PostgreSQL temporário pronto. Em ambas as tentativas, o processo encerrou com código 1 e informou ausência de `LICENSE_KEY`. Os testes HTTP comparativos ainda dependem de acesso licenciado. O CI dos adaptadores Go e a comparação dos dois OpenAPIs podem ser reproduzidos separadamente. [Detalhes do ensaio](reference-runtime-acceptance.json).
+A imagem AMD64 da matriz foi iniciada duas vezes em uma rede Docker interna com um PostgreSQL temporário pronto. Em ambas as tentativas, o processo encerrou com código 1 e informou ausência de `LICENSE_KEY`. O operador confirmou que não dispõe de uma instalação licenciada ou chave de teste. A comparação comportamental por HTTP continua pendente. O CI dos adaptadores Go e a comparação dos dois OpenAPIs podem ser reproduzidos separadamente. [Detalhes do ensaio](reference-runtime-acceptance.json).
 
 ## Comparação atualizada do servidor Node com o Go
 
