@@ -1048,6 +1048,7 @@ func (cli *Client) handleProtocolMessage(ctx context.Context, info *types.Messag
 // handler failure independently from ordinary Message-event suppression.
 func handleProtocolMessageResult(cli *Client, ctx context.Context, info *types.MessageInfo, msg *waE2E.Message) (ok, handlerFailed bool) {
 	ok = true
+	suppressMessage := false
 	protoMsg := msg.GetProtocolMessage()
 
 	if !info.IsFromMe {
@@ -1079,7 +1080,7 @@ func handleProtocolMessageResult(cli *Client, ctx context.Context, info *types.M
 		switch peerResp.GetPeerDataOperationRequestType() {
 		case waE2E.PeerDataOperationRequestType_UPLOAD_STICKER:
 			handlerFailed = cli.dispatchEvent(&events.StickerReupload{RequestID: peerResp.GetStanzaID(), Results: peerResp.GetPeerDataOperationResult()})
-			ok = false
+			suppressMessage = true
 		case waE2E.PeerDataOperationRequestType_PLACEHOLDER_MESSAGE_RESEND:
 			ok = cli.handlePlaceholderResendResponse(peerResp) && ok
 		case waE2E.PeerDataOperationRequestType_COMPANION_SYNCD_SNAPSHOT_FATAL_RECOVERY:
@@ -1099,7 +1100,7 @@ func handleProtocolMessageResult(cli *Client, ctx context.Context, info *types.M
 			}
 		}()
 	}
-	return
+	return ok && !suppressMessage, handlerFailed || !ok
 }
 
 func (cli *Client) shouldSendHistorySyncReceipt() bool {
@@ -1379,11 +1380,8 @@ func (cli *Client) storeHistoricalPNLIDMappings(ctx context.Context, mappings []
 
 func (cli *Client) handleDecryptedMessage(ctx context.Context, info *types.MessageInfo, msg *waE2E.Message, retryCount int) (handlerFailed bool) {
 	ok, failed := processProtocolPartsResult(cli, ctx, info, msg)
-	if failed {
-		return true
-	}
-	if !ok {
-		return true
+	if !ok || failed {
+		return failed
 	}
 	evt := &events.Message{Info: *info, RawMessage: msg, RetryCount: retryCount}
 	return cli.dispatchEvent(evt.UnwrapRaw())
