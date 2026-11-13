@@ -377,7 +377,6 @@ func (cli *Client) SendMessage(ctx context.Context, to types.JID, message *waE2E
 		if err != nil {
 			err = fmt.Errorf("failed to resolve LID for PN %s: %w", to, err)
 			return
-
 		}
 		resp.DebugTimings.LIDFetch = time.Since(start)
 		if req.GuardedSend != nil && (toLID.Server != types.HiddenUserServer || toLID.IsBot()) {
@@ -517,19 +516,7 @@ func (cli *Client) SendMessage(ctx context.Context, to types.JID, message *waE2E
 	expectedPHash := ag.OptionalString("phash")
 	if setParticipantHashMismatch(&resp, phash, expectedPHash) {
 		cli.Log.Warnf("Server returned different participant list hash (%s != %s) when sending to %s. Some devices may not have received the message.", phash, expectedPHash, to)
-		switch to.Server {
-		case types.GroupServer:
-			// TODO also invalidate device list caches
-			cli.groupCacheLock.Lock()
-			delete(cli.groupCache, to)
-			cli.groupCacheLock.Unlock()
-		case types.BroadcastServer:
-			// TODO do something
-		case types.DefaultUserServer, types.HiddenUserServer, types.BotServer, types.HostedServer, types.HostedLIDServer:
-			cli.userDevicesCacheLock.Lock()
-			delete(cli.userDevicesCache, to)
-			cli.userDevicesCacheLock.Unlock()
-		}
+		cli.invalidateParticipantHashCaches(to)
 	}
 	return
 }
@@ -1288,7 +1275,9 @@ func (cli *Client) getMessageContent(
 	if buttonType := getButtonTypeFromMessage(message); buttonType != "" {
 		if buttonType == "template" {
 			// Format envelope only: no category, template ID, verified name or bot identity.
-			content = append(content, waBinary.Node{Tag: "biz"}, waBinary.Node{Tag: "hsm"})
+			// Never add an hsm node: it belongs to the business template publish schema,
+			// and WhatsApp Web never sends one from a Linked Device.
+			content = append(content, waBinary.Node{Tag: "biz"})
 		} else if buttonType == "native_flow" {
 			content = append(content, buildNativeFlowBizNode(message, time.Now().Unix()))
 		} else {
@@ -1443,7 +1432,9 @@ func (cli *Client) encryptMessageForDevices(
 			continue
 		}
 		encryptionIdentity := jid
-		if jid.Server == types.DefaultUserServer {
+		if isHostedJID(jid) {
+			encryptionIdentity = cli.hostedSignalJID(ctx, jid)
+		} else if jid.Server == types.DefaultUserServer {
 			// TODO query LID from server for missing entries
 			if lidForPN, ok := lidMappings[jid]; ok && !lidForPN.IsEmpty() {
 				cli.migrateSessionStore(ctx, jid, lidForPN)

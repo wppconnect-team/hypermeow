@@ -108,8 +108,9 @@ func (fs *FrameSocket) CloseWithReason(code websocket.StatusCode, reason string)
 	}
 	fs.cancel()
 	fs.cancel = nil
-	if fs.OnDisconnect != nil {
-		go fs.OnDisconnect(fs.parentCtx, code == 0)
+	if handler := fs.OnDisconnect; handler != nil {
+		fs.OnDisconnect = nil
+		go handler(fs.parentCtx, code == 0)
 	}
 }
 

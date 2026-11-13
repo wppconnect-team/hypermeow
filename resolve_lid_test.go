@@ -85,6 +85,9 @@ func TestResolveLIDWithoutProfileMapping(t *testing.T) {
 				if err == nil || !resolved.IsEmpty() {
 					t.Fatalf("unsafe resolution: %v, %v", resolved, err)
 				}
+				if tc.contactType == "out" && !errors.Is(err, ErrRecipientNotOnWhatsApp) {
+					t.Fatalf("unregistered recipient error lost: %v", err)
+				}
 				if tc.transportFailure && !errors.Is(err, transportErr) {
 					t.Fatalf("transport error lost: %v", err)
 				}
