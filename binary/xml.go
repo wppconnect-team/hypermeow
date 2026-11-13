@@ -93,7 +93,7 @@ func printable(data []byte) string {
 func (n *Node) contentString() []string {
 	split := make([]string, 0)
 	if n.Content != nil && sensitiveXMLNodeContent(n.Tag) {
-		return append(split, "[redacted]")
+		return append(split, redacted)
 	}
 	switch content := n.Content.(type) {
 	case []Node:

@@ -116,7 +116,8 @@ func TestNoiseSocketStop(t *testing.T) {
 			fs.lock.Lock()
 			hasHandler := fs.OnDisconnect != nil
 			fs.lock.Unlock()
-			if hasHandler != tc.allowOnDisconnect {
+			// Close consumes the handler, so a disconnecting Stop leaves none behind.
+			if hasHandler != (tc.allowOnDisconnect && !tc.disconnect) {
 				t.Fatalf("Unexpected disconnect handler after Stop: %t", hasHandler)
 			}
 			fs.Close(0)
