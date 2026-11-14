@@ -188,7 +188,9 @@ func (cli *Client) InjectNode(ctx context.Context, node *waBinary.Node) error {
 			node = modified
 		}
 	}
-	cli.recvLog.Debugf("%s", node.String())
+	if !cli.isKeepAliveNode(node) {
+		cli.recvLog.Debugf("%s", node)
+	}
 	// Same order as handleFrame: out-of-band handling (business-catalog nonce
 	// delivery) runs before any dispatch so the normal handler sees the
 	// delivered state.
