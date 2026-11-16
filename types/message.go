@@ -111,7 +111,7 @@ type MessageInfo struct {
 	MsgBotInfo  MsgBotInfo
 	MsgMetaInfo MsgMetaInfo
 
-	// Deprecated: use StanzaTag and the newsletter sender to identify newsletter status.
+	// IsNewsletterStatus identifies status stanzas sent by newsletters.
 	IsNewsletterStatus bool
 	StanzaTag          string // message for normal messages, status for newsletters and status broadcasts, appdata for some other things
 
