@@ -7,12 +7,14 @@
 package waGroupMembershipFormSubmission
 
 import (
-	waGroupMembershipForm "github.com/polymorfa/hypermeow/proto/waGroupMembershipForm"
-	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
-	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
+
+	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
+	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+
+	waGroupMembershipForm "github.com/polymorfa/hypermeow/proto/waGroupMembershipForm"
 )
 
 const (
