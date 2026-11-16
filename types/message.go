@@ -111,7 +111,9 @@ type MessageInfo struct {
 	MsgBotInfo  MsgBotInfo
 	MsgMetaInfo MsgMetaInfo
 
+	// Deprecated: use StanzaTag and the newsletter sender to identify newsletter status.
 	IsNewsletterStatus bool
+	StanzaTag          string // message for normal messages, status for newsletters and status broadcasts, appdata for some other things
 
 	VerifiedName *VerifiedName
 	// BizPrivacyMode is the privacy mode from <biz actual_actors host_storage

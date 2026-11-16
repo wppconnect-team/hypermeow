@@ -252,6 +252,8 @@ func (cli *Client) parseMessageInfo(node *waBinary.Node) (*types.MessageInfo, er
 	if err != nil {
 		return nil, err
 	}
+	info.StanzaTag = node.Tag
+	info.IsNewsletterStatus = node.Tag == "status" && info.Sender.Server == types.NewsletterServer
 	ag := node.AttrGetter()
 	info.ID = types.MessageID(ag.String("id"))
 	info.ServerID = types.MessageServerID(ag.OptionalInt("server_id"))

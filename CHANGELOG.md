@@ -9,6 +9,15 @@ All notable HyperMeow changes are documented here. HyperMeow uses commit pseudo-
 
 ## [Unreleased]
 
+- Status broadcasts use the message handler. The stanza name is available in
+  `MessageInfo.StanzaTag`. Existing users of `IsNewsletterStatus` retain the
+  newsletter-specific flag.
+- WhatsApp Web protocol revision 1054751086 changes the wire type of Labyrinth
+  epoch IDs. Use `proto/waWebLabyrinthWaWasmV1054751086` with that revision.
+  The original `proto/waWebLabyrinthWaWasm` package continues to read and write
+  its original format. The versioned descriptor has its own protobuf namespace
+  so applications can import both packages.
+
 ### Added
 
 - Opt-in concurrent WebSocket connections through `SocketConfig.RaceURLs`, with asynchronous loser cleanup and support for native and JS/WASM builds. See [connection options](README.md#connection-options).
