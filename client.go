@@ -1132,6 +1132,7 @@ Loop:
 		case node := <-queue:
 			if connCtx.Err() != nil {
 				if node.Tag == "stream:error" {
+					cli.Log.Debugf("Handling stream:error node in handler queue loop after context cancellation")
 					cli.handleStreamError(evtCtx, node)
 				}
 				cli.Log.Debugf("Closing handler queue loop before node handling")
@@ -1183,7 +1184,7 @@ func (cli *Client) defaultNodeHandlers() map[string]nodeHandler {
 	return map[string]nodeHandler{
 		"message":      cli.handleEncryptedMessage,
 		"appdata":      cli.handleEncryptedMessage,
-		"status":       cli.handleUnencryptedMessage,
+		"status":       cli.handleEncryptedMessage,
 		"receipt":      cli.handleReceipt,
 		"call":         cli.handleCallEvent,
 		"chatstate":    cli.handleChatState,

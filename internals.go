@@ -343,6 +343,10 @@ func (int *DangerousInternalClient) SendKeepAlive(ctx context.Context) (isSucces
 	return int.c.sendKeepAlive(ctx)
 }
 
+func (int *DangerousInternalClient) IsKeepAliveNode(node *waBinary.Node) bool {
+	return int.c.isKeepAliveNode(node)
+}
+
 func (int *DangerousInternalClient) RefreshMediaConn(ctx context.Context, force bool) (*MediaConn, error) {
 	return int.c.refreshMediaConn(ctx, force)
 }
@@ -537,6 +541,10 @@ func (int *DangerousInternalClient) HandlePictureNotification(ctx context.Contex
 
 func (int *DangerousInternalClient) HandleDeviceNotification(ctx context.Context, node *waBinary.Node) {
 	int.c.handleDeviceNotification(ctx, node)
+}
+
+func (int *DangerousInternalClient) HandleFBCallNotification(ctx context.Context, node *waBinary.Node) bool {
+	return int.c.handleFBCallNotification(ctx, node)
 }
 
 func (int *DangerousInternalClient) HandleFBDeviceNotification(ctx context.Context, node *waBinary.Node) {
