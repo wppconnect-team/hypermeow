@@ -28,7 +28,6 @@ import (
 	"github.com/polymorfa/hypermeow/proto/waHistorySync"
 	"github.com/polymorfa/hypermeow/proto/waMediaTransport"
 	"github.com/polymorfa/hypermeow/proto/waServerSync"
-	"github.com/polymorfa/hypermeow/socket"
 	"github.com/polymorfa/hypermeow/types"
 	"github.com/polymorfa/hypermeow/util/cbcutil"
 	"github.com/polymorfa/hypermeow/util/hkdfutil"
@@ -373,8 +372,8 @@ func (cli *Client) doMediaDownloadRequest(ctx context.Context, url string) (*htt
 	if err != nil {
 		return nil, fmt.Errorf("failed to prepare request: %w", err)
 	}
-	req.Header.Set("Origin", socket.Origin)
-	req.Header.Set("Referer", socket.Origin+"/")
+	req.Header.Set("Origin", cli.getMediaOrigin())
+	req.Header.Set("Referer", cli.getMediaOrigin()+"/")
 	if userAgent := cli.getUserAgent(); userAgent != "" {
 		req.Header.Set("User-Agent", cli.getUserAgent())
 	}
