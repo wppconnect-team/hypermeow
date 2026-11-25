@@ -219,7 +219,7 @@ func TestUpgradeFromUpstreamSchemaPreservesExistingWASAColumn(t *testing.T) {
 			indexCreated = true
 		}
 	}
-	if state.version != 20 || !indexCreated {
+	if state.version != 21 || !indexCreated {
 		t.Fatalf("incomplete migration: version=%d,index=%v", state.version, indexCreated)
 	}
 }
