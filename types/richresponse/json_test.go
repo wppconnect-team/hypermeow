@@ -73,3 +73,22 @@ func TestRichResponseRejectsMalformedKnownValues(t *testing.T) {
 		}
 	}
 }
+
+func TestRichResponseKeepsLegacyFieldsAndAcceptsNewOptionalShapes(t *testing.T) {
+	var legacy RichResponse
+	input := []byte(`{"sections":[],"footer_sections":[{"view_model":{"__typename":"LegacyFooter"}}],"embedded_screens":[{"legacy":true}]}`)
+	if err := json.Unmarshal(input, &legacy); err != nil {
+		t.Fatal(err)
+	}
+	if len(legacy.FooterSections) != 1 || len(legacy.EmbeddedScreens) != 1 {
+		t.Fatal("valid optional fields were lost")
+	}
+	var newer RichResponse
+	input = []byte(`{"sections":[{"view_model":{"__typename":"FutureViewModel"}}],"footer_sections":{"items":[]},"embedded_screens":{"items":[]}}`)
+	if err := json.Unmarshal(input, &newer); err != nil {
+		t.Fatal(err)
+	}
+	if len(newer.Sections) != 1 || newer.FooterSections != nil || newer.EmbeddedScreens != nil {
+		t.Fatal("unexpected parsing of updated optional fields")
+	}
+}

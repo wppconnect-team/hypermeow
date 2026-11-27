@@ -21,6 +21,36 @@ type RichResponse struct {
 	EmbeddedScreens []json.RawMessage    `json:"embedded_screens,omitempty"`
 }
 
+// UnmarshalJSON accepts the stable sections even when optional entries use a newer schema.
+func (r *RichResponse) UnmarshalJSON(data []byte) error {
+	type responseFields RichResponse
+	next := responseFields(*r)
+	fields := struct {
+		*responseFields
+		Footer  json.RawMessage `json:"footer_sections"`
+		Screens json.RawMessage `json:"embedded_screens"`
+	}{responseFields: &next}
+	if err := json.Unmarshal(data, &fields); err != nil {
+		return err
+	}
+	if fields.Footer != nil {
+		var footer []ViewModelContainer
+		if json.Unmarshal(fields.Footer, &footer) != nil {
+			footer = nil
+		}
+		next.FooterSections = footer
+	}
+	if fields.Screens != nil {
+		var screens []json.RawMessage
+		if json.Unmarshal(fields.Screens, &screens) != nil {
+			screens = nil
+		}
+		next.EmbeddedScreens = screens
+	}
+	*r = RichResponse(next)
+	return nil
+}
+
 type ViewModelContainer struct {
 	Model ViewModel `json:"view_model"`
 }
