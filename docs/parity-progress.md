@@ -41,3 +41,7 @@ No [teste com Chatwoot 4.19.1](https://github.com/wppconnect-team/wppconnect-ser
 ## Favoritos e sincronização de estado
 
 Z136 usa `star-message`, `message-state-result` e `message-star-state`. O primeiro comando altera a preferência, o segundo recupera o recibo e o último consulta o booleano efetivamente observado. A sessão procura a mensagem e o remetente no próprio histórico. O teste cobre repetição, confirmação incerta, colisão de chave e isolamento entre sessões. [Contrato do servidor](https://github.com/wppconnect-team/wppconnect-server-go/blob/a7c46b0c3a1c127f6f3b9f969ff2a3b3bdcb520d/docs/favoritos.pt-BR.md).
+
+## Revalidação na v0.1.40
+
+O [aceite isolado da v0.1.40](parity-v0.1.40.md) verifica os 22 contratos e registra os cenários do artefato publicado. Os critérios de catálogo Business e de comparação HTTP licenciada continuam nos respectivos itens do plano.
