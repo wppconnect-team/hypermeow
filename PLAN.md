@@ -51,7 +51,8 @@ Os registros abaixo sao cronologicos: pendencias de um marco antigo podem estar 
 - [x] Falhas de entrega: consulta por sessao/destino/estado, replay seletivo auditado e metricas de backlog/capacidade, com testes de falha e recuperacao.
 - [ ] ADIADO pelo usuario em 10/11/2026: nenhum monitoramento ou destino de notificacao por ora. Nao instalar nem disparar alertas operacionais; as regras seguem como exemplos e nao ha entrega validada.
 - [x] Conta de teste real: QR, reconexao, texto/arquivo, ACK de entrega/leitura, resposta recebida, idempotencia e download de midia depois de restart. Outro workspace recebe 404.
-- [ ] Logout e pareamento por codigo de telefone separados do QR.
+- [x] Logout, fechamento e pareamento por código têm comandos distintos. Na v0.1.40, o teste isolado verificou autenticação por sessão, validação do telefone, logout desconectado, preservação de credenciais se o logout falha e estado CLOSED após reinício. [Aceite isolado](docs/parity-v0.1.40.md#sessões-e-restauração)
+- [ ] Confirmar em conta descartável o vínculo com código de telefone e a revogação efetiva após logout. O código usa o mesmo transporte inicial de pareamento do QR.
 - [ ] ADIADO pelo usuario em 10/11/2026: jornadas com segunda conta pareada e validacao Android/iPhone/Web. Nao bloqueiam a implementacao automatizada; nao contam como aprovadas.
 
 ## Fase 6 - Paridade funcional Zuck
@@ -72,7 +73,7 @@ Os registros abaixo sao cronologicos: pendencias de um marco antigo podem estar 
 - [x] J11 no server-go (contrato local): catalogo proprio, produto e colecoes, limite e cursor, escopo da conta e preco sem conversao.
 - [x] J11: fontes de leitura incorporadas em [Go #23](https://github.com/wppconnect-team/wppconnect-server-go/pull/23), CI com race e imagens.
 - [x] J11: leitura publicada na Cloud, protecao das tres rotas, guia EN/PT e tres reservas Go saudaveis; [recibo](docs/brokers-catalog-acceptance.json).
-- [ ] J11: aceite de catalogo em conta Business com produtos/colecoes reais.
+- [ ] J11: aceite de catálogo em conta WhatsApp Business com produto e coleção descartáveis. Verificar leitura e paginação, criação, edição, exclusão, visibilidade, revisão e efeito do carrinho no comprador.
 - [ ] Comercio: catalogos/produtos/pedidos/pagamentos com contratos e idempotencia.
 - [x] J05/Z126: contrato HTTP experimental de carrossel PNG/JPEG com respostas rapidas; validacao antes de upload, isolamento, deduplicacao e payload protobuf testados; CI 42901305610 aprovado e main 93304d79bd09af36386035170e78886e6b151e56.
 - [ ] Interativos modernos: botoes/listas/carrosseis/flows com teste Android/iOS/Web.
@@ -298,7 +299,9 @@ Os criterios de fechamento por entrega estao em [parity-remaining.md](docs/parit
 - [x] Z285 - Editar produto e conferir o ID devolvido.
 - [x] Z283 - Excluir produtos e representar a contagem parcial.
 - [x] Conferir escopos da Cloud, contratos OpenAPI e resultados persistidos nas suítes isoladas.
-- [ ] Aceite externo adiado. A exclusão de canal foi limitada a testes isolados pelo operador. O catálogo exige conta Business e a comparação HTTP exige Zuck licenciada.
+- [ ] Confirmar contraparte no WhatsApp para os comandos de catálogo, com uma conta Business de teste e dados descartáveis.
+- [ ] Comparar respostas HTTP e efeitos com uma instância Zuck v2.4.2 licenciada.
+- [ ] Aceite externo da exclusão de canal adiado por decisão do operador. A verificação permanece isolada.
 
 O verificador executou sete funções de teste HTTP para 22 contratos nativos mapeados sobre 303 operações de referência. Os dez diferenciais inicialmente apontados na comparação Node/Go têm testes de contrato. O CI do SDK executou as suítes de Go em duas versões. Na Cloud, os 52 testes locais passaram, assim como TypeScript, build e a leitura da documentação no navegador nas larguras 320, 375, 768 e 1440. A verificação desta fase usou exclusivamente recursos isolados. [SDK #16](https://github.com/wppconnect-team/hypermeow/pull/16), [servidor #39](https://github.com/wppconnect-team/wppconnect-server-go/pull/39), [Cloud #47](https://github.com/joaosouz4dev/wppconnect-cloud/pull/47) e [comparação dos cinco contratos](docs/parity-remaining.md#cinco-contratos-em-relação-ao-swagger-da-referência).
 
@@ -309,3 +312,12 @@ O verificador executou sete funções de teste HTTP para 22 contratos nativos ma
 - [x] Conferir a imagem publicada `wppconnect/wppconnect-server-go:v0.1.35`. O manifesto contém `linux/amd64` e `linux/arm64` e tem digest `sha256:d1079e6ab33d1c20896d67d4ddbef6de0a77ef30242a73c209d97e1baca160b5`. [Release v0.1.35](https://github.com/wppconnect-team/wppconnect-server-go/releases/tag/v0.1.35) e [execução da publicação](https://github.com/wppconnect-team/wppconnect-server-go/actions/runs/42958534363).
 
 - [x] Atualizar a pool da Cloud para a v0.1.35. Em 11/11/2026 às 01h43 de São Paulo, as três reservas Go estavam saudáveis no digest publicado. Uma nova alocação pelo Manager confirmou as verificações de cinco comandos sem pareamento. As quatro alocações de teste foram removidas e as duas instâncias já alocadas preservaram o mesmo contêiner e o mesmo horário de início. A configuração e a imagem anteriores ficaram disponíveis para reversão. [Registro da atualização](docs/cloud-pool-v0.1.35.json).
+
+
+## Revalidação de paridade na v0.1.40 - 2026-11-27
+
+- [x] Fixar a referência no SHA da tag v0.1.40 e reproduzir a comparação OpenAPI com o Node fixado. O inventário Zuck v2.4.2 mantém 303 operações. [Comparação](docs/parity-v0.1.40.md)
+- [x] Executar as sete funções de teste HTTP da matriz sobre 22 contratos Go. Os cinco comandos de canal e catálogo preservaram seus recibos após reinício de um processo Go descartável, com rejeição de corpo diferente sob a mesma chave. [Teste reproduzível](docs/check-isolated-mutation-replay.py)
+- [x] Cobrir isolamento de sessão, telefone inválido, logout desconectado, fechamento persistido e migração SQLite com credenciais de teste. [Evidências e limites](docs/parity-v0.1.40.md#sessões-e-restauração)
+- [ ] Comparar respostas de sucesso e falha, idempotência e efeitos com uma instalação Zuck v2.4.2 licenciada. A comparação estática do Swagger está disponível.
+- [ ] Executar aceite Business com catálogo descartável e validar moderação, visibilidade e carrinho no comprador. Os testes da conta pessoal e as fixtures locais não exercitam esse estado remoto.
