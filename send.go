@@ -969,6 +969,7 @@ func (cli *Client) sendDM(
 }
 
 func getTypeFromMessage(msg *waE2E.Message) string {
+	msg = events.UnwrapMessage(msg)
 	switch {
 	case msg.ViewOnceMessage != nil:
 		return getTypeFromMessage(msg.ViewOnceMessage.Message)
@@ -989,6 +990,8 @@ func getTypeFromMessage(msg *waE2E.Message) string {
 		return getTypeFromMessage(msg.AssociatedChildMessage.Message)
 	case msg.ReactionMessage != nil, msg.EncReactionMessage != nil:
 		return "reaction"
+	case msg.EventMessage != nil, msg.GetSecretEncryptedMessage().GetSecretEncType() == waE2E.SecretEncryptedMessage_EVENT_EDIT:
+		return "event"
 	case msg.PollCreationMessage != nil, msg.PollUpdateMessage != nil:
 		return "poll"
 	case getMediaTypeFromMessage(msg) != "":
@@ -1001,6 +1004,7 @@ func getTypeFromMessage(msg *waE2E.Message) string {
 }
 
 func getMediaTypeFromMessage(msg *waE2E.Message) string {
+	msg = events.UnwrapMessage(msg)
 	switch {
 	case msg.ViewOnceMessage != nil:
 		return getMediaTypeFromMessage(msg.ViewOnceMessage.Message)
@@ -1064,6 +1068,7 @@ func getMediaTypeFromMessage(msg *waE2E.Message) string {
 // getButtonTypeFromMessage selects relay business metadata after following
 // ephemeral/view-once wrappers, or returns an empty string for other message forms.
 func getButtonTypeFromMessage(msg *waE2E.Message) string {
+	msg = events.UnwrapMessage(msg)
 	switch {
 	case msg.ViewOnceMessage != nil:
 		return getButtonTypeFromMessage(msg.ViewOnceMessage.Message)
@@ -1089,6 +1094,7 @@ func getButtonTypeFromMessage(msg *waE2E.Message) string {
 }
 
 func buildNativeFlowBizNode(msg *waE2E.Message, nowUnix int64) waBinary.Node {
+	msg = events.UnwrapMessage(msg)
 	name := "mixed"
 	for msg != nil {
 		switch {
@@ -1132,6 +1138,7 @@ unwrapped:
 }
 
 func getButtonAttributes(msg *waE2E.Message) waBinary.Attrs {
+	msg = events.UnwrapMessage(msg)
 	switch {
 	case msg.ViewOnceMessage != nil:
 		return getButtonAttributes(msg.ViewOnceMessage.Message)
@@ -1178,6 +1185,8 @@ func getEditAttribute(msg *waE2E.Message) types.EditAttribute {
 		return types.EditAttributeSenderRevoke
 	case msg.PinInChatMessage != nil:
 		return types.EditAttributePinInChat
+	case msg.GetSecretEncryptedMessage().GetSecretEncType() == waE2E.SecretEncryptedMessage_EVENT_EDIT:
+		return types.EditAttributeMessageEdit
 	}
 	return types.EditAttributeEmpty
 }
@@ -1250,15 +1259,28 @@ func (cli *Client) getMessageContent(
 	if includeIdentity {
 		content = append(content, cli.makeDeviceIdentityNode())
 	}
-	if msgAttrs["type"] == "poll" {
+	payload := events.UnwrapMessage(message)
+	switch msgAttrs["type"] {
+	case "poll":
 		pollType := "creation"
-		if message.PollUpdateMessage != nil {
+		if payload.GetPollUpdateMessage() != nil {
 			pollType = "vote"
 		}
 		content = append(content, waBinary.Node{
 			Tag: "meta",
 			Attrs: waBinary.Attrs{
 				"polltype": pollType,
+			},
+		})
+	case "event":
+		eventType := "creation"
+		if payload.GetSecretEncryptedMessage().GetSecretEncType() == waE2E.SecretEncryptedMessage_EVENT_EDIT {
+			eventType = "edit"
+		}
+		content = append(content, waBinary.Node{
+			Tag: "meta",
+			Attrs: waBinary.Attrs{
+				"event_type": eventType,
 			},
 		})
 	}

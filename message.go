@@ -398,7 +398,7 @@ func (cli *Client) decryptMessages(ctx context.Context, info *types.MessageInfo,
 			return
 		}
 		cli.backgroundIfAsyncAck(func() {
-			if uType != events.UnavailableTypeViewOnce {
+			if uType != events.UnavailableTypeViewOnce && uType != events.UnavailableTypeSenderDrop {
 				cli.immediateRequestMessageFromPhone(ctx, info)
 			}
 			cli.sendAck(ctx, node, 0)
@@ -515,6 +515,12 @@ func (cli *Client) decryptMessages(ctx context.Context, info *types.MessageInfo,
 				DecryptFailMode: events.DecryptFailMode(ag.OptionalString("decrypt-fail")),
 			})
 			continue
+		} else if err != nil && encType == "msmsg" && info.Chat == types.MetaAISideChatJID {
+			cli.Log.Debugf("Ignoring undecryptable message %s in Meta AI side chat: %v", info.ID, err)
+			cli.backgroundIfAsyncAck(func() {
+				cli.sendAck(ctx, node, NackMissingMessageSecret)
+			})
+			return
 		} else if err != nil {
 			cli.Log.Warnf("Error decrypting message %s from %s: %v", info.ID, info.SourceString(), err)
 			if ctx.Err() != nil || errors.Is(err, context.Canceled) || errors.Is(err, ErrEventBufferDB) {
